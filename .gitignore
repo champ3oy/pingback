@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+*.js.map
+*.d.ts
+!shared/types/src/**/*.d.ts
+coverage/
+.turbo/
