@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { Play, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
+import { Play, ChevronDown, ChevronRight, Copy, Check, CircleCheck, CircleX, Clock, Loader2 } from "lucide-react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { StatusBadge } from "@/components/status-badge";
+import { CodeBlock } from "@/components/code-block";
 import { useExecutions, type Execution } from "@/lib/hooks/use-executions";
 
 function CopyButton({ text }: { text: string }) {
@@ -32,12 +33,29 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+const statusIcon: Record<string, React.ReactNode> = {
+  success: <CircleCheck className="h-4 w-4 text-green-500" />,
+  failed: <CircleX className="h-4 w-4 text-red-500" />,
+  running: <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />,
+  pending: <Clock className="h-4 w-4 text-yellow-500" />,
+};
+
 function RunDetail({ exec }: { exec: Execution }) {
   const formattedOutput = (() => {
     if (!exec.responseBody) return null;
     try { return JSON.stringify(JSON.parse(exec.responseBody), null, 2); }
     catch { return exec.responseBody; }
   })();
+
+  // Format logs as a readable text block for syntax highlighting
+  const logsText = exec.logs?.length
+    ? exec.logs.map((log) => {
+        const time = new Date(log.timestamp).toLocaleTimeString([], {
+          hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit",
+        });
+        return `[${time}] ${log.message}`;
+      }).join("\n")
+    : null;
 
   return (
     <div className="border-t border-border">
@@ -73,24 +91,21 @@ function RunDetail({ exec }: { exec: Execution }) {
       <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-border min-h-[200px]">
         {/* Left panel — Trace / Logs */}
         <div className="p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">Trace</p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Trace</p>
+            {logsText && <CopyButton text={logsText} />}
+          </div>
 
           {exec.errorMessage && (
-            <div className="rounded border border-destructive/30 bg-destructive/5 px-3 py-2 mb-3">
+            <div className="rounded border border-destructive/30 bg-destructive/5 px-3 py-2 mb-3 flex items-start gap-2">
+              <CircleX className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
               <p className="text-xs font-medium text-destructive">{exec.errorMessage}</p>
             </div>
           )}
 
-          {exec.logs && exec.logs.length > 0 ? (
-            <div className="space-y-0.5 font-mono text-xs">
-              {exec.logs.map((log, i) => (
-                <div key={i} className="flex gap-2 py-0.5">
-                  <span className="text-muted-foreground shrink-0 tabular-nums">
-                    {new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 } as any)}
-                  </span>
-                  <span className="text-foreground">{log.message}</span>
-                </div>
-              ))}
+          {logsText ? (
+            <div className="rounded border bg-black p-3 overflow-auto max-h-[300px]">
+              <CodeBlock code={logsText} lang="log" />
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">No log entries</p>
@@ -106,14 +121,7 @@ function RunDetail({ exec }: { exec: Execution }) {
 
           {formattedOutput ? (
             <div className="rounded border bg-black p-3 overflow-auto max-h-[300px]">
-              <pre className="text-xs font-mono">
-                {formattedOutput.split('\n').map((line, i) => (
-                  <div key={i} className="flex">
-                    <span className="text-muted-foreground select-none w-8 shrink-0 text-right mr-3">{i + 1}</span>
-                    <span className="text-foreground">{colorizeJson(line)}</span>
-                  </div>
-                ))}
-              </pre>
+              <CodeBlock code={formattedOutput} lang="json" />
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">No output</p>
@@ -122,19 +130,6 @@ function RunDetail({ exec }: { exec: Execution }) {
       </div>
     </div>
   );
-}
-
-function colorizeJson(line: string): React.ReactNode {
-  // Simple JSON syntax coloring
-  return line.replace(
-    /("(?:[^"\\]|\\.)*")\s*:/g,
-    '___KEY___$1___ENDKEY___:'
-  ).split(/(___KEY___|___ENDKEY___)/).map((part, i) => {
-    if (part === '___KEY___') return null;
-    if (part === '___ENDKEY___') return null;
-    // Check if this part is a key (follows ___KEY___)
-    return <span key={i}>{part}</span>;
-  });
 }
 
 export default function RunsPage() {
@@ -201,7 +196,12 @@ export default function RunsPage() {
                       <TableCell className="font-medium">
                         {exec.job?.name || exec.jobId.slice(0, 8)}
                       </TableCell>
-                      <TableCell><StatusBadge status={exec.status} /></TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          {statusIcon[exec.status]}
+                          <StatusBadge status={exec.status} />
+                        </div>
+                      </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {exec.startedAt ? new Date(exec.startedAt).toLocaleString() : "—"}
                       </TableCell>
