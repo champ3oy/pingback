@@ -30,7 +30,7 @@ export function CodeBlock({ code, lang = "json", showLineNumbers = true }: CodeB
 
   return (
     <div
-      className="shiki-wrapper text-xs overflow-auto [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!text-xs [&_.line]:flex [&_.line]:leading-5"
+      className="shiki-wrapper text-xs overflow-auto [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!text-xs [&_code]:!leading-[1.4] [&_.line]:flex [&_span]:!leading-[1.4]"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
