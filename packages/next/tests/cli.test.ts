@@ -86,11 +86,12 @@ describe('CLI init', () => {
     expect(matches!.length).toBe(2); // one import, one usage
   });
 
-  it('should add to .gitignore', () => {
-    writeFileSync(join(tmpDir, '.gitignore'), 'node_modules\n');
+  it('should create route handler file', () => {
     runInit();
-    const content = readFileSync(join(tmpDir, '.gitignore'), 'utf-8');
-    expect(content).toContain('app/api/__pingback');
+    const routePath = join(tmpDir, 'app', 'api', '__pingback', 'route.ts');
+    expect(existsSync(routePath)).toBe(true);
+    const content = readFileSync(routePath, 'utf-8');
+    expect(content).toContain('createRouteHandler');
   });
 
   it('should create example function', () => {

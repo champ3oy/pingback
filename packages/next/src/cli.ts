@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
 const cwd = process.cwd();
@@ -102,21 +102,27 @@ export default withPingback({});
   success(`Wrapped ${configFile} with withPingback()`);
 }
 
-function updateGitignore() {
-  const gitignorePath = join(cwd, '.gitignore');
-  const entry = 'app/api/__pingback';
+function createRouteHandler() {
+  const routeDir = join(cwd, 'app', 'api', '__pingback');
+  const routeFile = join(routeDir, 'route.ts');
 
-  if (existsSync(gitignorePath)) {
-    const content = readFileSync(gitignorePath, 'utf-8');
-    if (content.includes(entry)) {
-      skip('.gitignore already contains app/api/__pingback');
-      return;
-    }
-    appendFileSync(gitignorePath, `\n# Pingback auto-generated route\n${entry}\n`);
-  } else {
-    writeFileSync(gitignorePath, `# Pingback auto-generated route\n${entry}\n`);
+  if (existsSync(routeFile)) {
+    skip('app/api/__pingback/route.ts already exists');
+    return;
   }
-  success('Added app/api/__pingback to .gitignore');
+
+  mkdirSync(routeDir, { recursive: true });
+  writeFileSync(
+    routeFile,
+    `import { createRouteHandler } from "@pingback/next/handler";
+
+// Import all your pingback function files here
+import "@/lib/pingback/example";
+
+export const POST = createRouteHandler();
+`,
+  );
+  success('Created app/api/__pingback/route.ts');
 }
 
 function createExampleFunction() {
@@ -151,7 +157,7 @@ function main() {
 
   createPingbackConfig();
   wrapNextConfig();
-  updateGitignore();
+  createRouteHandler();
   createExampleFunction();
 
   console.log('\nDone! Next steps:\n');
@@ -161,7 +167,9 @@ function main() {
   console.log('');
   console.log('  2. Edit lib/pingback/example.ts with your actual cron job');
   console.log('');
-  console.log('  3. Run next build to register your functions\n');
+  console.log('  3. Add imports for each function file in app/api/__pingback/route.ts');
+  console.log('');
+  console.log('  4. Run next build to register your functions\n');
 }
 
 main();
