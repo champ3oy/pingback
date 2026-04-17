@@ -1,19 +1,27 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join, relative } from 'path';
-import { glob } from 'glob';
+import { globSync } from 'glob';
 import { loadConfig } from './config';
 import { registerFunctions } from './register';
 
-export async function discoverFunctionFiles(
+export function discoverFunctionFilesSync(
   projectRoot: string,
   pattern: string,
-): Promise<string[]> {
-  const files = await glob(pattern, { cwd: projectRoot, absolute: true });
+): string[] {
+  const files = globSync(pattern, { cwd: projectRoot, absolute: true });
 
   return files.filter((file) => {
     const content = readFileSync(file, 'utf-8');
     return content.includes('@pingback/next');
   });
+}
+
+// Keep async version for tests
+export async function discoverFunctionFiles(
+  projectRoot: string,
+  pattern: string,
+): Promise<string[]> {
+  return discoverFunctionFilesSync(projectRoot, pattern);
 }
 
 export function generateRouteFile(
@@ -44,23 +52,61 @@ export const POST = createRouteHandler();
   writeFileSync(routeFilePath, content);
 }
 
+let routeGenerated = false;
+
 export function withPingback(nextConfig: any = {}): any {
   const originalWebpack = nextConfig.webpack;
-  let buildPromise: Promise<void> | null = null;
+
+  // Generate route file synchronously BEFORE webpack runs
+  // This ensures the route exists when Next.js compiles pages
+  if (!routeGenerated) {
+    try {
+      const projectRoot = process.cwd();
+      const configPath = join(projectRoot, 'pingback.config.ts');
+      const configPathJs = join(projectRoot, 'pingback.config.js');
+
+      if (existsSync(configPath) || existsSync(configPathJs)) {
+        // Read config defaults manually (can't async import here)
+        const functionsDir = 'lib/pingback/**/*.{ts,js}';
+        const routePath = '/api/__pingback';
+
+        const files = discoverFunctionFilesSync(projectRoot, functionsDir);
+        if (files.length > 0) {
+          console.log(`[pingback] Found ${files.length} function file(s)`);
+          generateRouteFile(projectRoot, routePath, files);
+          console.log(`[pingback] Generated route handler at app${routePath}/route.ts`);
+
+          const routeDir = `app${routePath}`;
+          const gitignorePath = join(projectRoot, '.gitignore');
+          if (existsSync(gitignorePath)) {
+            const gitignore = readFileSync(gitignorePath, 'utf-8');
+            if (!gitignore.includes(routeDir)) {
+              console.warn(`[pingback] Warning: Add "${routeDir}" to your .gitignore`);
+            }
+          }
+        }
+      }
+      routeGenerated = true;
+    } catch (err) {
+      console.error(`[pingback] Route generation failed: ${(err as Error).message}`);
+    }
+  }
+
+  let registrationPromise: Promise<void> | null = null;
 
   return {
     ...nextConfig,
     webpack(config: any, context: any) {
-      if (context.isServer && !buildPromise) {
-        buildPromise = runPingbackBuild(context.dir, !context.dev).catch((err: Error) => {
-          console.error('[pingback] Build failed:', err.message);
+      // Only register with platform during production server builds
+      if (context.isServer && !context.dev && !registrationPromise) {
+        registrationPromise = runRegistration(context.dir).catch((err: Error) => {
+          console.error(`[pingback] Registration failed: ${err.message}`);
         });
 
-        // Add a plugin that waits for registration to finish before build completes
         config.plugins.push({
           apply(compiler: any) {
             compiler.hooks.afterEmit.tapPromise('PingbackRegistration', async () => {
-              if (buildPromise) await buildPromise;
+              if (registrationPromise) await registrationPromise;
             });
           },
         });
@@ -74,35 +120,18 @@ export function withPingback(nextConfig: any = {}): any {
   };
 }
 
-async function runPingbackBuild(projectRoot: string, shouldRegister = true): Promise<void> {
+async function runRegistration(projectRoot: string): Promise<void> {
   const config = await loadConfig(projectRoot);
-  const files = await discoverFunctionFiles(projectRoot, config.functionsDir);
+  const files = discoverFunctionFilesSync(projectRoot, config.functionsDir);
 
-  console.log(`[pingback] Found ${files.length} function file(s)`);
+  if (files.length === 0) return;
 
-  generateRouteFile(projectRoot, config.routePath, files);
-  console.log(`[pingback] Generated route handler at app${config.routePath}/route.ts`);
-
-  const routeDir = `app${config.routePath}`;
-  const gitignorePath = join(projectRoot, '.gitignore');
-  if (existsSync(gitignorePath)) {
-    const gitignore = readFileSync(gitignorePath, 'utf-8');
-    if (!gitignore.includes(routeDir)) {
-      console.warn(`[pingback] Warning: Add "${routeDir}" to your .gitignore — it's auto-generated.`);
+  for (const file of files) {
+    try { await import(file); } catch (err) {
+      console.warn(`[pingback] Could not import ${file}: ${(err as Error).message}`);
     }
   }
 
-  if (files.length > 0 && shouldRegister) {
-    for (const file of files) {
-      try { await import(file); } catch (err) {
-        console.warn(`[pingback] Could not import ${file}: ${(err as Error).message}`);
-      }
-    }
-    try {
-      const result = await registerFunctions(config);
-      console.log(`[pingback] Registered ${result.jobs.length} function(s) with platform`);
-    } catch (err) {
-      console.error(`[pingback] Registration failed: ${(err as Error).message}`);
-    }
-  }
+  const result = await registerFunctions(config);
+  console.log(`[pingback] Registered ${result.jobs.length} function(s) with platform`);
 }
