@@ -13,6 +13,16 @@ import { GithubStrategy } from './github.strategy';
 import { ApiKeyStrategy } from './api-key.strategy';
 import { ApiKeyGuard } from './api-key.guard';
 
+const githubProvider = {
+  provide: GithubStrategy,
+  inject: [ConfigService, AuthService],
+  useFactory: (config: ConfigService, authService: AuthService) => {
+    const clientId = config.get<string>('github.clientId');
+    if (!clientId) return null;
+    return new GithubStrategy(config, authService);
+  },
+};
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, ApiKey]),
@@ -31,7 +41,7 @@ import { ApiKeyGuard } from './api-key.guard';
     AuthService,
     JwtStrategy,
     JwtAuthGuard,
-    GithubStrategy,
+    githubProvider,
     ApiKeyStrategy,
     ApiKeyGuard,
   ],

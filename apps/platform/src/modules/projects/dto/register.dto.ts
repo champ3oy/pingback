@@ -51,7 +51,7 @@ class FunctionMetadataDto {
   options?: FunctionOptionsDto;
 }
 
-export class RegisterDto {
+export class SdkRegisterDto {
   @ApiProperty({ description: 'Project ID to register functions for', example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })
   @IsUUID()
   project_id: string;

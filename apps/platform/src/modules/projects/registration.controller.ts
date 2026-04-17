@@ -10,7 +10,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagg
 import { Request } from 'express';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 import { RegistrationService } from './registration.service';
-import { RegisterDto } from './dto/register.dto';
+import { SdkRegisterDto } from './dto/register.dto';
 import { RegistrationResponse } from './dto/registration-response.dto';
 
 @ApiTags('SDK Registration')
@@ -24,7 +24,7 @@ export class RegistrationController {
   @ApiOperation({ summary: 'Register functions from the SDK' })
   @ApiResponse({ status: 201, description: 'Functions registered successfully', type: RegistrationResponse })
   @ApiResponse({ status: 403, description: 'API key does not belong to this project' })
-  register(@Req() req: Request, @Body() dto: RegisterDto) {
+  register(@Req() req: Request, @Body() dto: SdkRegisterDto) {
     const { project } = req.user as any;
     if (project.id !== dto.project_id) {
       throw new ForbiddenException('API key does not belong to this project');
