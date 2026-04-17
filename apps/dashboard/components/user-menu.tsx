@@ -5,7 +5,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { clearTokens } from "@/app/actions/auth";
+import { clearTokens } from "@/lib/api";
 
 export function UserMenu() {
   return (

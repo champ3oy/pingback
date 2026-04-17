@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { setTokens } from "@/app/actions/auth";
+import { setTokens } from "@/lib/api";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -13,9 +13,8 @@ export default function AuthCallbackPage() {
     const refreshToken = searchParams.get("refreshToken");
 
     if (accessToken && refreshToken) {
-      setTokens(accessToken, refreshToken).then(() => {
-        router.push("/projects");
-      });
+      setTokens(accessToken, refreshToken);
+      router.push("/projects");
     } else {
       router.push("/login");
     }

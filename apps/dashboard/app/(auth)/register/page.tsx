@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { registerWithCredentials, getGithubAuthUrl } from "@/lib/auth";
-import { setTokens } from "@/app/actions/auth";
+import { setTokens } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function RegisterPage() {
 
     try {
       const tokens = await registerWithCredentials(email, password, name || undefined);
-      await setTokens(tokens.accessToken, tokens.refreshToken);
+      setTokens(tokens.accessToken, tokens.refreshToken);
       router.push("/projects");
     } catch (err) {
       setError((err as Error).message);

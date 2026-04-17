@@ -2,7 +2,17 @@
 
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import { Play, ChevronDown, ChevronRight, Copy, Check, CircleCheck, CircleX, Clock, Loader2 } from "lucide-react";
+import {
+  Play,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  Check,
+  CircleCheck,
+  CircleX,
+  Clock,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
@@ -38,13 +48,19 @@ const statusIcon: Record<string, React.ReactNode> = {
 function RunDetail({ exec }: { exec: Execution }) {
   const formattedOutput = (() => {
     if (!exec.responseBody) return null;
-    try { return JSON.stringify(JSON.parse(exec.responseBody), null, 2); }
-    catch { return exec.responseBody; }
+    try {
+      return JSON.stringify(JSON.parse(exec.responseBody), null, 2);
+    } catch {
+      return exec.responseBody;
+    }
   })();
 
-  const durationFormatted = exec.durationMs != null
-    ? exec.durationMs >= 1000 ? `${(exec.durationMs / 1000).toFixed(1)}s` : `${exec.durationMs}ms`
-    : "—";
+  const durationFormatted =
+    exec.durationMs != null
+      ? exec.durationMs >= 1000
+        ? `${(exec.durationMs / 1000).toFixed(1)}s`
+        : `${exec.durationMs}ms`
+      : "—";
 
   return (
     <div className="border-t border-border bg-background">
@@ -53,45 +69,75 @@ function RunDetail({ exec }: { exec: Execution }) {
         <div className="p-4 pb-2">
           <div className="flex gap-8 mb-3">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Run ID</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                Run ID
+              </p>
               <p className="text-xs font-mono">{exec.id.slice(0, 24)}...</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Function</p>
-              <p className="text-xs font-medium text-primary">{exec.job?.name || exec.jobId.slice(0, 8)}</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                Function
+              </p>
+              <p className="text-xs font-medium text-primary">
+                {exec.job?.name || exec.jobId.slice(0, 8)}
+              </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Duration</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                Duration
+              </p>
               <p className="text-xs font-medium">{durationFormatted}</p>
             </div>
           </div>
           <div className="flex gap-8">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Scheduled at</p>
-              <p className="text-xs">{new Date(exec.scheduledAt).toLocaleString()}</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                Scheduled at
+              </p>
+              <p className="text-xs">
+                {new Date(exec.scheduledAt).toLocaleString()}
+              </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Started at</p>
-              <p className="text-xs">{exec.startedAt ? new Date(exec.startedAt).toLocaleString() : "—"}</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                Started at
+              </p>
+              <p className="text-xs">
+                {exec.startedAt
+                  ? new Date(exec.startedAt).toLocaleString()
+                  : "—"}
+              </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Completed at</p>
-              <p className="text-xs">{exec.completedAt ? new Date(exec.completedAt).toLocaleString() : "—"}</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                Completed at
+              </p>
+              <p className="text-xs">
+                {exec.completedAt
+                  ? new Date(exec.completedAt).toLocaleString()
+                  : "—"}
+              </p>
             </div>
           </div>
         </div>
         <div className="p-4 pb-2">
           <div className="flex gap-8">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">HTTP Status</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                HTTP Status
+              </p>
               <p className="text-xs font-medium">{exec.httpStatus || "—"}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Attempt</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                Attempt
+              </p>
               <p className="text-xs font-medium">{exec.attempt}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Status</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                Status
+              </p>
               <StatusBadge status={exec.status} />
             </div>
           </div>
@@ -106,7 +152,9 @@ function RunDetail({ exec }: { exec: Execution }) {
             <div className="flex items-center gap-2 mb-1">
               {statusIcon[exec.status]}
               <span className="text-sm font-medium">Run</span>
-              <span className="text-xs text-muted-foreground">{durationFormatted}</span>
+              <span className="text-xs text-muted-foreground">
+                {durationFormatted}
+              </span>
             </div>
             <div className="ml-6 h-5 rounded-sm bg-border overflow-hidden">
               <div
@@ -124,16 +172,29 @@ function RunDetail({ exec }: { exec: Execution }) {
           {exec.logs && exec.logs.length > 0 && (
             <div className="ml-6 space-y-0">
               {exec.logs.map((log, i) => {
-                const prevTs = i > 0 ? exec.logs[i - 1].timestamp : (exec.startedAt ? new Date(exec.startedAt).getTime() : log.timestamp);
+                const prevTs =
+                  i > 0
+                    ? exec.logs[i - 1].timestamp
+                    : exec.startedAt
+                      ? new Date(exec.startedAt).getTime()
+                      : log.timestamp;
                 const stepDuration = log.timestamp - prevTs;
-                const stepFormatted = stepDuration >= 1000 ? `${(stepDuration / 1000).toFixed(1)}s` : `${stepDuration}ms`;
+                const stepFormatted =
+                  stepDuration >= 1000
+                    ? `${(stepDuration / 1000).toFixed(1)}s`
+                    : `${stepDuration}ms`;
                 return (
-                  <div key={i} className="flex items-center py-1 border-l border-border pl-3 ml-1">
+                  <div
+                    key={i}
+                    className="flex items-center py-1 border-l border-border pl-3 ml-1"
+                  >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground shrink-0" />
                       <span className="text-xs truncate">{log.message}</span>
                     </div>
-                    <span className="text-[10px] text-muted-foreground tabular-nums shrink-0 ml-2">{stepFormatted}</span>
+                    <span className="text-[10px] text-muted-foreground tabular-nums shrink-0 ml-2">
+                      {stepFormatted}
+                    </span>
                   </div>
                 );
               })}
@@ -178,7 +239,7 @@ export default function RunsPage() {
   const { data, isLoading } = useExecutions(projectId, { page, limit: 20 });
 
   function toggleRow(id: string) {
-    setExpandedId(prev => prev === id ? null : id);
+    setExpandedId((prev) => (prev === id ? null : id));
   }
 
   return (
@@ -203,7 +264,7 @@ export default function RunsPage() {
             {/* Header */}
             <div className="flex items-center px-2 py-2.5 border-b text-xs font-medium text-muted-foreground">
               <div className={colClass.chevron} />
-              <div className={colClass.run}>Run</div>
+              <div className={colClass.run}>Runa</div>
               <div className={colClass.job}>Job</div>
               <div className={colClass.status}>Status</div>
               <div className={colClass.started}>Started</div>
@@ -226,10 +287,14 @@ export default function RunsPage() {
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     )}
                   </div>
-                  <div className={`${colClass.run} text-primary font-mono text-sm`}>
-                    {data.total - ((page - 1) * 20) - index}
+                  <div
+                    className={`${colClass.run} text-primary font-mono text-sm`}
+                  >
+                    {data.total - (page - 1) * 20 - index}
                   </div>
-                  <div className={`${colClass.job} text-sm font-medium truncate`}>
+                  <div
+                    className={`${colClass.job} text-sm font-medium truncate`}
+                  >
                     {exec.job?.name || exec.jobId.slice(0, 8)}
                   </div>
                   <div className={colClass.status}>
@@ -238,16 +303,28 @@ export default function RunsPage() {
                       <StatusBadge status={exec.status} />
                     </div>
                   </div>
-                  <div className={`${colClass.started} text-sm text-muted-foreground`}>
-                    {exec.startedAt ? new Date(exec.startedAt).toLocaleString() : "—"}
+                  <div
+                    className={`${colClass.started} text-sm text-muted-foreground`}
+                  >
+                    {exec.startedAt
+                      ? new Date(exec.startedAt).toLocaleString()
+                      : "—"}
                   </div>
-                  <div className={`${colClass.duration} text-sm text-muted-foreground`}>
-                    {exec.durationMs != null ? `${(exec.durationMs / 1000).toFixed(1)}s` : "—"}
+                  <div
+                    className={`${colClass.duration} text-sm text-muted-foreground`}
+                  >
+                    {exec.durationMs != null
+                      ? `${(exec.durationMs / 1000).toFixed(1)}s`
+                      : "—"}
                   </div>
-                  <div className={`${colClass.attempt} text-sm text-muted-foreground`}>
+                  <div
+                    className={`${colClass.attempt} text-sm text-muted-foreground`}
+                  >
                     {exec.attempt}
                   </div>
-                  <div className={`${colClass.created} text-sm text-muted-foreground`}>
+                  <div
+                    className={`${colClass.created} text-sm text-muted-foreground`}
+                  >
                     {new Date(exec.createdAt).toLocaleString()}
                   </div>
                 </div>

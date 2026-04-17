@@ -1,10 +1,37 @@
-import { getAccessToken, getRefreshToken, setTokens, clearTokens } from "@/app/actions/auth";
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
+function getCookie(name: string): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
+function setCookie(name: string, value: string, maxAge: number) {
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; samesite=lax`;
+}
+
+function deleteCookie(name: string) {
+  document.cookie = `${name}=; path=/; max-age=0`;
+}
+
+export function getAccessToken(): string | undefined {
+  return getCookie("pingback_access_token");
+}
+
+export function setTokens(accessToken: string, refreshToken: string) {
+  setCookie("pingback_access_token", accessToken, 60 * 15); // 15 min
+  setCookie("pingback_refresh_token", refreshToken, 60 * 60 * 24 * 7); // 7 days
+}
+
+export function clearTokens() {
+  deleteCookie("pingback_access_token");
+  deleteCookie("pingback_refresh_token");
+  window.location.href = "/login";
+}
+
 async function refreshAccessToken(): Promise<string | null> {
-  const refreshToken = await getRefreshToken();
-  const accessToken = await getAccessToken();
+  const refreshToken = getCookie("pingback_refresh_token");
+  const accessToken = getCookie("pingback_access_token");
   if (!refreshToken || !accessToken) return null;
 
   try {
@@ -20,15 +47,18 @@ async function refreshAccessToken(): Promise<string | null> {
     if (!res.ok) return null;
 
     const data = await res.json();
-    await setTokens(data.accessToken, data.refreshToken);
+    setTokens(data.accessToken, data.refreshToken);
     return data.accessToken;
   } catch {
     return null;
   }
 }
 
-async function fetchWithAuth(path: string, options: RequestInit = {}): Promise<Response> {
-  let token = await getAccessToken();
+async function fetchWithAuth(
+  path: string,
+  options: RequestInit = {},
+): Promise<Response> {
+  const token = getAccessToken();
 
   const makeRequest = (authToken: string) =>
     fetch(`${API_URL}${path}`, {
@@ -47,7 +77,7 @@ async function fetchWithAuth(path: string, options: RequestInit = {}): Promise<R
     if (newToken) {
       res = await makeRequest(newToken);
     } else {
-      await clearTokens();
+      clearTokens();
     }
   }
 
