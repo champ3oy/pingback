@@ -3,9 +3,6 @@
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { Play, ChevronDown, ChevronRight, Copy, Check, CircleCheck, CircleX, Clock, Loader2 } from "lucide-react";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
@@ -50,10 +47,9 @@ function RunDetail({ exec }: { exec: Execution }) {
     : "—";
 
   return (
-    <div className="border-t border-border">
-      {/* Metadata — two rows like Inngest */}
+    <div className="border-t border-border bg-background">
+      {/* Metadata rows */}
       <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-border">
-        {/* Left metadata */}
         <div className="p-4 pb-2">
           <div className="flex gap-8 mb-3">
             <div>
@@ -84,8 +80,6 @@ function RunDetail({ exec }: { exec: Execution }) {
             </div>
           </div>
         </div>
-
-        {/* Right metadata */}
         <div className="p-4 pb-2">
           <div className="flex gap-8">
             <div>
@@ -97,10 +91,6 @@ function RunDetail({ exec }: { exec: Execution }) {
               <p className="text-xs font-medium">{exec.attempt}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Duration</p>
-              <p className="text-xs font-medium">{durationFormatted}</p>
-            </div>
-            <div>
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Status</p>
               <StatusBadge status={exec.status} />
             </div>
@@ -108,19 +98,14 @@ function RunDetail({ exec }: { exec: Execution }) {
         </div>
       </div>
 
-      {/* Two-panel: Trace left, Output right */}
+      {/* Trace + Output */}
       <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-border border-t border-border">
-        {/* Trace panel */}
         <div className="p-4">
           <p className="text-sm font-medium mb-3">Trace</p>
-
-          {/* Timeline bar */}
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-1">
-              <div className="flex items-center gap-1.5">
-                {statusIcon[exec.status]}
-                <span className="text-sm font-medium">Run</span>
-              </div>
+              {statusIcon[exec.status]}
+              <span className="text-sm font-medium">Run</span>
               <span className="text-xs text-muted-foreground">{durationFormatted}</span>
             </div>
             <div className="ml-6 h-5 rounded-sm bg-border overflow-hidden">
@@ -130,23 +115,18 @@ function RunDetail({ exec }: { exec: Execution }) {
               />
             </div>
           </div>
-
-          {/* Error */}
           {exec.errorMessage && (
             <div className="rounded border border-destructive/30 bg-destructive/5 px-3 py-2 mb-3 flex items-start gap-2 ml-6">
               <CircleX className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
               <p className="text-xs text-destructive">{exec.errorMessage}</p>
             </div>
           )}
-
-          {/* Log steps as tree items */}
           {exec.logs && exec.logs.length > 0 && (
             <div className="ml-6 space-y-0">
               {exec.logs.map((log, i) => {
                 const prevTs = i > 0 ? exec.logs[i - 1].timestamp : (exec.startedAt ? new Date(exec.startedAt).getTime() : log.timestamp);
                 const stepDuration = log.timestamp - prevTs;
                 const stepFormatted = stepDuration >= 1000 ? `${(stepDuration / 1000).toFixed(1)}s` : `${stepDuration}ms`;
-
                 return (
                   <div key={i} className="flex items-center py-1 border-l border-border pl-3 ml-1">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -160,14 +140,11 @@ function RunDetail({ exec }: { exec: Execution }) {
             </div>
           )}
         </div>
-
-        {/* Output panel */}
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-medium">Output</p>
             {formattedOutput && <CopyButton text={formattedOutput} />}
           </div>
-
           {formattedOutput ? (
             <div className="overflow-auto max-h-[400px]">
               <CodeBlock code={formattedOutput} lang="json" />
@@ -181,6 +158,18 @@ function RunDetail({ exec }: { exec: Execution }) {
   );
 }
 
+// Column widths for consistent alignment
+const colClass = {
+  chevron: "w-10 shrink-0 flex items-center justify-center",
+  run: "w-16 shrink-0",
+  job: "flex-1 min-w-0",
+  status: "w-32 shrink-0",
+  started: "w-44 shrink-0",
+  duration: "w-20 shrink-0",
+  attempt: "w-20 shrink-0",
+  created: "w-44 shrink-0",
+};
+
 export default function RunsPage() {
   const params = useParams();
   const projectId = params.projectId as string;
@@ -189,7 +178,7 @@ export default function RunsPage() {
   const { data, isLoading } = useExecutions(projectId, { page, limit: 20 });
 
   function toggleRow(id: string) {
-    setExpandedId(expandedId === id ? null : id);
+    setExpandedId(prev => prev === id ? null : id);
   }
 
   return (
@@ -211,67 +200,61 @@ export default function RunsPage() {
       ) : (
         <>
           <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-8"></TableHead>
-                  <TableHead>Run</TableHead>
-                  <TableHead>Job</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Started</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Attempt</TableHead>
-                  <TableHead>Created</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.items.map((exec, index) => (
-                  <React.Fragment key={exec.id}>
-                    <TableRow
-                      className={`cursor-pointer hover:bg-secondary/50 ${expandedId === exec.id ? "bg-secondary/30" : ""}`}
-                      onClick={() => toggleRow(exec.id)}
-                    >
-                      <TableCell className="w-8 px-3">
-                        {expandedId === exec.id ? (
-                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </TableCell>
-                      <TableCell className="text-primary font-mono text-sm">
-                        {data.total - ((page - 1) * 20) - index}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {exec.job?.name || exec.jobId.slice(0, 8)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1.5">
-                          {statusIcon[exec.status]}
-                          <StatusBadge status={exec.status} />
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {exec.startedAt ? new Date(exec.startedAt).toLocaleString() : "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {exec.durationMs != null ? `${(exec.durationMs / 1000).toFixed(1)}s` : "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{exec.attempt}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {new Date(exec.createdAt).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                    {expandedId === exec.id && (
-                      <TableRow>
-                        <TableCell colSpan={8} className="p-0">
-                          <RunDetail exec={exec} />
-                        </TableCell>
-                      </TableRow>
+            {/* Header */}
+            <div className="flex items-center px-2 py-2.5 border-b text-xs font-medium text-muted-foreground">
+              <div className={colClass.chevron} />
+              <div className={colClass.run}>Run</div>
+              <div className={colClass.job}>Job</div>
+              <div className={colClass.status}>Status</div>
+              <div className={colClass.started}>Started</div>
+              <div className={colClass.duration}>Duration</div>
+              <div className={colClass.attempt}>Attempt</div>
+              <div className={colClass.created}>Created</div>
+            </div>
+
+            {/* Rows */}
+            {data.items.map((exec, index) => (
+              <div key={exec.id}>
+                <div
+                  className={`flex items-center px-2 py-2.5 border-b cursor-pointer transition-colors hover:bg-secondary/50 ${expandedId === exec.id ? "bg-secondary/30" : ""}`}
+                  onClick={() => toggleRow(exec.id)}
+                >
+                  <div className={colClass.chevron}>
+                    {expandedId === exec.id ? (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     )}
-                  </React.Fragment>
-                ))}
-              </TableBody>
-            </Table>
+                  </div>
+                  <div className={`${colClass.run} text-primary font-mono text-sm`}>
+                    {data.total - ((page - 1) * 20) - index}
+                  </div>
+                  <div className={`${colClass.job} text-sm font-medium truncate`}>
+                    {exec.job?.name || exec.jobId.slice(0, 8)}
+                  </div>
+                  <div className={colClass.status}>
+                    <div className="flex items-center gap-1.5">
+                      {statusIcon[exec.status]}
+                      <StatusBadge status={exec.status} />
+                    </div>
+                  </div>
+                  <div className={`${colClass.started} text-sm text-muted-foreground`}>
+                    {exec.startedAt ? new Date(exec.startedAt).toLocaleString() : "—"}
+                  </div>
+                  <div className={`${colClass.duration} text-sm text-muted-foreground`}>
+                    {exec.durationMs != null ? `${(exec.durationMs / 1000).toFixed(1)}s` : "—"}
+                  </div>
+                  <div className={`${colClass.attempt} text-sm text-muted-foreground`}>
+                    {exec.attempt}
+                  </div>
+                  <div className={`${colClass.created} text-sm text-muted-foreground`}>
+                    {new Date(exec.createdAt).toLocaleString()}
+                  </div>
+                </div>
+
+                {expandedId === exec.id && <RunDetail exec={exec} />}
+              </div>
+            ))}
           </div>
 
           <div className="flex items-center justify-between mt-4">
