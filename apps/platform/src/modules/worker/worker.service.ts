@@ -28,15 +28,17 @@ export class WorkerService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.queueService.work('pingback-execution', (job: any) =>
-      this.processJob(job),
-    );
+    this.queueService.work('pingback-execution', (jobs: any) => {
+      // pgboss v10 passes an array of jobs to the handler
+      const jobList = Array.isArray(jobs) ? jobs : [jobs];
+      return Promise.all(jobList.map((j: any) => this.processJob(j)));
+    });
     this.logger.log('Worker subscribed to pingback-execution queue');
   }
 
   async processJob(job: any) {
-    // pgboss v10 passes data directly on the job object, or under .data
     const msg: QueueMessage = job.data || job;
+    this.logger.log(`Processing execution ${msg.executionId} for ${msg.functionName}`);
 
     try {
       await this.executionsService.markRunning(msg.executionId);
