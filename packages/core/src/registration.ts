@@ -18,19 +18,19 @@ export class RegistrationClient {
   ) {}
 
   async register(
-    projectId: string,
     functions: FunctionMetadata[],
+    options?: { projectId?: string; endpointUrl?: string },
   ): Promise<RegistrationResponse> {
+    const body: Record<string, unknown> = { functions };
+    if (options?.projectId) body.project_id = options.projectId;
+    if (options?.endpointUrl) body.endpoint_url = options.endpointUrl;
     const response = await fetch(`${this.baseUrl}/api/v1/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.apiKey}`,
       },
-      body: JSON.stringify({
-        project_id: projectId,
-        functions,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {

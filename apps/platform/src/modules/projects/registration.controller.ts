@@ -26,9 +26,10 @@ export class RegistrationController {
   @ApiResponse({ status: 403, description: 'API key does not belong to this project' })
   register(@Req() req: Request, @Body() dto: SdkRegisterDto) {
     const { project } = req.user as any;
-    if (project.id !== dto.project_id) {
+    const projectId = dto.project_id || project.id;
+    if (projectId !== project.id) {
       throw new ForbiddenException('API key does not belong to this project');
     }
-    return this.registrationService.register(dto.project_id, dto.functions);
+    return this.registrationService.register(projectId, dto.functions, dto.endpoint_url);
   }
 }

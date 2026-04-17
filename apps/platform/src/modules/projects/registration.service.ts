@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { parseExpression } from 'cron-parser';
 import { Job } from '../jobs/job.entity';
+import { Project } from './project.entity';
 
 interface FunctionMetadata {
   name: string;
@@ -19,10 +20,15 @@ interface FunctionMetadata {
 export class RegistrationService {
   constructor(
     @InjectRepository(Job) private jobRepo: Repository<Job>,
+    @InjectRepository(Project) private projectRepo: Repository<Project>,
   ) {}
 
-  async register(projectId: string, functions: FunctionMetadata[]) {
+  async register(projectId: string, functions: FunctionMetadata[], endpointUrl?: string) {
     const results: Array<{ name: string; status: string }> = [];
+
+    if (endpointUrl) {
+      await this.projectRepo.update(projectId, { endpointUrl });
+    }
 
     for (const fn of functions) {
       const existing = await this.jobRepo.findOne({

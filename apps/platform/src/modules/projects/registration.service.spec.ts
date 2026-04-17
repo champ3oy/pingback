@@ -2,10 +2,12 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RegistrationService } from './registration.service';
 import { Job } from '../jobs/job.entity';
+import { Project } from './project.entity';
 
 describe('RegistrationService', () => {
   let service: RegistrationService;
   let jobRepo: Record<string, jest.Mock>;
+  let projectRepo: Record<string, jest.Mock>;
 
   beforeEach(async () => {
     jobRepo = {
@@ -14,11 +16,13 @@ describe('RegistrationService', () => {
       save: jest.fn(),
       createQueryBuilder: jest.fn(),
     };
+    projectRepo = { update: jest.fn().mockResolvedValue({}) };
 
     const module = await Test.createTestingModule({
       providers: [
         RegistrationService,
         { provide: getRepositoryToken(Job), useValue: jobRepo },
+        { provide: getRepositoryToken(Project), useValue: projectRepo },
       ],
     }).compile();
 
