@@ -20,14 +20,17 @@ describe('RegistrationClient', () => {
       json: () => Promise.resolve({ jobs: [] }),
     });
 
-    await client.register('proj_123', [
-      {
-        name: 'send-emails',
-        type: 'cron' as const,
-        schedule: '*/15 * * * *',
-        options: { retries: 3, timeout: '60s', concurrency: 1 },
-      },
-    ]);
+    await client.register(
+      [
+        {
+          name: 'send-emails',
+          type: 'cron' as const,
+          schedule: '*/15 * * * *',
+          options: { retries: 3, timeout: '60s', concurrency: 1 },
+        },
+      ],
+      { projectId: 'proj_123' },
+    );
 
     expect(mockFetch).toHaveBeenCalledWith(
       'https://api.pingback.dev/api/v1/register',
@@ -38,7 +41,6 @@ describe('RegistrationClient', () => {
           Authorization: 'Bearer pk_test_key',
         },
         body: JSON.stringify({
-          project_id: 'proj_123',
           functions: [
             {
               name: 'send-emails',
@@ -47,6 +49,7 @@ describe('RegistrationClient', () => {
               options: { retries: 3, timeout: '60s', concurrency: 1 },
             },
           ],
+          project_id: 'proj_123',
         }),
       },
     );
@@ -60,7 +63,7 @@ describe('RegistrationClient', () => {
     });
 
     await expect(
-      client.register('proj_123', []),
+      client.register([], { projectId: 'proj_123' }),
     ).rejects.toThrow('Registration failed (401): Unauthorized');
   });
 
@@ -70,9 +73,10 @@ describe('RegistrationClient', () => {
       json: () => Promise.resolve({ jobs: [{ name: 'send-emails', status: 'active' }] }),
     });
 
-    const result = await client.register('proj_123', [
-      { name: 'send-emails', type: 'cron' as const, schedule: '* * * * *', options: {} },
-    ]);
+    const result = await client.register(
+      [{ name: 'send-emails', type: 'cron' as const, schedule: '* * * * *', options: {} }],
+      { projectId: 'proj_123' },
+    );
 
     expect(result.jobs).toHaveLength(1);
     expect(result.jobs[0].name).toBe('send-emails');

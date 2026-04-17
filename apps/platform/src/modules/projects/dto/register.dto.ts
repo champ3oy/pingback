@@ -52,9 +52,15 @@ class FunctionMetadataDto {
 }
 
 export class SdkRegisterDto {
-  @ApiProperty({ description: 'Project ID to register functions for', example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })
+  @ApiPropertyOptional({ description: 'Project ID to register functions for', example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })
   @IsUUID()
-  project_id: string;
+  @IsOptional()
+  project_id?: string;
+
+  @ApiPropertyOptional({ description: 'Endpoint URL for the route handler', example: 'https://myapp.vercel.app/api/__pingback' })
+  @IsString()
+  @IsOptional()
+  endpoint_url?: string;
 
   @ApiProperty({ description: 'Array of functions to register', type: [FunctionMetadataDto] })
   @IsArray()
