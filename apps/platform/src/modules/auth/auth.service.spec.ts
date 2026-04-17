@@ -19,6 +19,7 @@ describe('AuthService', () => {
     };
     jwtService = {
       sign: jest.fn().mockReturnValue('mock-token'),
+      verify: jest.fn().mockReturnValue({ sub: 'user-1' }),
     };
 
     const module = await Test.createTestingModule({

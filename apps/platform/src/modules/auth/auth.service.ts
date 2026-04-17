@@ -54,6 +54,12 @@ export class AuthService {
   }
 
   async refreshTokens(userId: string, refreshToken: string) {
+    try {
+      this.jwtService.verify(refreshToken);
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user || !user.refreshToken) {
       throw new UnauthorizedException('Invalid refresh token');
@@ -87,7 +93,11 @@ export class AuthService {
     return this.userRepo.save(user);
   }
 
-  async generateTokens(user: User) {
+  async loginGithubUser(user: User) {
+    return this.generateTokens(user);
+  }
+
+  private async generateTokens(user: User) {
     const payload = { sub: user.id, email: user.email };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });

@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ApiKey } from '../api-keys/api-key.entity';
+import { API_KEY_PREFIX_LENGTH } from '../../common/constants';
 
 @Injectable()
 export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') {
@@ -19,7 +20,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') {
       throw new UnauthorizedException('Invalid API key format');
     }
 
-    const prefix = token.substring(0, 16);
+    const prefix = token.substring(0, API_KEY_PREFIX_LENGTH);
     const candidates = await this.apiKeyRepo.find({
       where: { keyPrefix: prefix },
       relations: ['project', 'project.user'],
