@@ -193,18 +193,6 @@ function RunDetail({ exec }: { exec: Execution }) {
   );
 }
 
-// Column widths for consistent alignment
-const colClass = {
-  chevron: "w-10 shrink-0 flex items-center justify-center",
-  run: "w-16 shrink-0",
-  job: "flex-1 min-w-0",
-  status: "w-32 shrink-0",
-  started: "w-44 shrink-0",
-  duration: "w-20 shrink-0",
-  attempt: "w-20 shrink-0",
-  created: "w-44 shrink-0",
-};
-
 export default function RunsPage() {
   const params = useParams();
   const projectId = params.projectId as string;
@@ -234,78 +222,56 @@ export default function RunsPage() {
         />
       ) : (
         <>
-          <div className="rounded-md border">
-            {/* Header */}
-            <div className="flex items-center px-2 py-2.5 border-b text-xs font-medium text-muted-foreground">
-              <div className={colClass.chevron} />
-              <div className={colClass.run}>Runa</div>
-              <div className={colClass.job}>Job</div>
-              <div className={colClass.status}>Status</div>
-              <div className={colClass.started}>Started</div>
-              <div className={colClass.duration}>Duration</div>
-              <div className={colClass.attempt}>Attempt</div>
-              <div className={colClass.created}>Created</div>
-            </div>
-
-            {/* Rows */}
-            {data.items.map((exec, index) => (
-              <div key={exec.id}>
-                <div
-                  className={`flex items-center px-2 py-2.5 border-b cursor-pointer transition-colors hover:bg-secondary/50 ${expandedId === exec.id ? "bg-secondary/30" : ""}`}
-                  onClick={() => toggleRow(exec.id)}
-                >
-                  <div className={colClass.chevron}>
-                    {expandedId === exec.id ? (
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div
-                    className={`${colClass.run} text-primary font-mono text-sm`}
+          <div className="rounded-md border overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-secondary/30">
+                  <th className="w-10 p-2" />
+                  <th className="p-2 text-left text-xs font-medium text-muted-foreground">Run</th>
+                  <th className="p-2 text-left text-xs font-medium text-muted-foreground">Job</th>
+                  <th className="p-2 text-left text-xs font-medium text-muted-foreground">Status</th>
+                  <th className="p-2 text-left text-xs font-medium text-muted-foreground">Started</th>
+                  <th className="p-2 text-left text-xs font-medium text-muted-foreground">Duration</th>
+                  <th className="p-2 text-left text-xs font-medium text-muted-foreground">Attempt</th>
+                  <th className="p-2 text-left text-xs font-medium text-muted-foreground">Created</th>
+                </tr>
+              </thead>
+              {data.items.map((exec, index) => (
+                <tbody key={exec.id}>
+                  <tr
+                    className={`border-b cursor-pointer transition-colors hover:bg-secondary/50 ${expandedId === exec.id ? "bg-secondary/30" : ""}`}
+                    onClick={() => toggleRow(exec.id)}
                   >
-                    {data.total - (page - 1) * 20 - index}
-                  </div>
-                  <div
-                    className={`${colClass.job} text-sm font-medium truncate`}
-                  >
-                    {exec.job?.name || exec.jobId.slice(0, 8)}
-                  </div>
-                  <div className={colClass.status}>
-                    <div className="flex items-center gap-1.5">
-                      {statusIcon[exec.status]}
-                      <StatusBadge status={exec.status} />
-                    </div>
-                  </div>
-                  <div
-                    className={`${colClass.started} text-sm text-muted-foreground`}
-                  >
-                    {exec.startedAt
-                      ? new Date(exec.startedAt).toLocaleString()
-                      : "—"}
-                  </div>
-                  <div
-                    className={`${colClass.duration} text-sm text-muted-foreground`}
-                  >
-                    {exec.durationMs != null
-                      ? `${(exec.durationMs / 1000).toFixed(1)}s`
-                      : "—"}
-                  </div>
-                  <div
-                    className={`${colClass.attempt} text-sm text-muted-foreground`}
-                  >
-                    {exec.attempt}
-                  </div>
-                  <div
-                    className={`${colClass.created} text-sm text-muted-foreground`}
-                  >
-                    {new Date(exec.createdAt).toLocaleString()}
-                  </div>
-                </div>
-
-                {expandedId === exec.id && <RunDetail exec={exec} />}
-              </div>
-            ))}
+                    <td className="w-10 p-2 text-center">
+                      {expandedId === exec.id ? (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground inline" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground inline" />
+                      )}
+                    </td>
+                    <td className="p-2 text-primary font-mono">{data.total - (page - 1) * 20 - index}</td>
+                    <td className="p-2 font-medium">{exec.job?.name || exec.jobId.slice(0, 8)}</td>
+                    <td className="p-2">
+                      <div className="flex items-center gap-1.5">
+                        {statusIcon[exec.status]}
+                        <StatusBadge status={exec.status} />
+                      </div>
+                    </td>
+                    <td className="p-2 text-muted-foreground">{exec.startedAt ? new Date(exec.startedAt).toLocaleString() : "—"}</td>
+                    <td className="p-2 text-muted-foreground">{exec.durationMs != null ? `${(exec.durationMs / 1000).toFixed(1)}s` : "—"}</td>
+                    <td className="p-2 text-muted-foreground">{exec.attempt}</td>
+                    <td className="p-2 text-muted-foreground">{new Date(exec.createdAt).toLocaleString()}</td>
+                  </tr>
+                  {expandedId === exec.id && (
+                    <tr>
+                      <td colSpan={8} className="p-0">
+                        <RunDetail exec={exec} />
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              ))}
+            </table>
           </div>
 
           <div className="flex items-center justify-between mt-4">
