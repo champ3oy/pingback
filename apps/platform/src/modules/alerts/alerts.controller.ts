@@ -10,6 +10,7 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProjectsService } from '../projects/projects.service';
@@ -17,6 +18,8 @@ import { AlertsService } from './alerts.service';
 import { CreateAlertDto } from './dto/create-alert.dto';
 import { UpdateAlertDto } from './dto/update-alert.dto';
 
+@ApiTags('Alerts')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard)
 @Controller('api/v1/projects/:projectId/alerts')
 export class AlertsController {
@@ -26,6 +29,9 @@ export class AlertsController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a new alert' })
+  @ApiParam({ name: 'projectId', description: 'Project UUID' })
+  @ApiResponse({ status: 201, description: 'Alert created' })
   async create(
     @Req() req: Request,
     @Param('projectId') projectId: string,
@@ -37,6 +43,10 @@ export class AlertsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'List alerts for a project' })
+  @ApiParam({ name: 'projectId', description: 'Project UUID' })
+  @ApiQuery({ name: 'jobId', required: false, description: 'Filter by job ID' })
+  @ApiResponse({ status: 200, description: 'List of alerts' })
   async findAll(
     @Req() req: Request,
     @Param('projectId') projectId: string,
@@ -48,6 +58,10 @@ export class AlertsController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update an alert' })
+  @ApiParam({ name: 'projectId', description: 'Project UUID' })
+  @ApiParam({ name: 'id', description: 'Alert UUID' })
+  @ApiResponse({ status: 200, description: 'Alert updated' })
   async update(
     @Req() req: Request,
     @Param('projectId') projectId: string,
@@ -60,6 +74,10 @@ export class AlertsController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete an alert' })
+  @ApiParam({ name: 'projectId', description: 'Project UUID' })
+  @ApiParam({ name: 'id', description: 'Alert UUID' })
+  @ApiResponse({ status: 200, description: 'Alert deleted' })
   async remove(
     @Req() req: Request,
     @Param('projectId') projectId: string,
