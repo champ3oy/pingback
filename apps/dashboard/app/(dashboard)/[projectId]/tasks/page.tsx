@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/empty-state";
 import { StatusBadge } from "@/components/status-badge";
 import { DataTable, type Column } from "@/components/data-table";
 import { useJobs, type Job } from "@/lib/hooks/use-jobs";
+import { PageHeader } from "@/components/page-header";
 
 const columns: Column<Job>[] = [
   {
@@ -45,16 +46,18 @@ export default function TasksPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Tasks</h1>
-      <DataTable
-        columns={columns}
-        data={jobs}
-        isLoading={isLoading}
-        keyFn={(job) => job.id}
-        emptyState={
-          <EmptyState icon={ListChecks} title="No tasks yet" description="Background tasks defined with task() will appear here." />
-        }
-      />
+      <PageHeader title="Tasks" />
+      <div className="p-6">
+        <DataTable
+          columns={columns}
+          data={jobs}
+          isLoading={isLoading}
+          keyFn={(job) => job.id}
+          emptyState={
+            <EmptyState icon={ListChecks} title="No tasks yet" description="Background tasks defined with task() will appear here." />
+          }
+        />
+      </div>
     </div>
   );
 }

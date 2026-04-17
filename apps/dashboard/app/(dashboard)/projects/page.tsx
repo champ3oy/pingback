@@ -7,6 +7,7 @@ import { DataTable, type Column } from "@/components/data-table";
 import { useProjects, type Project } from "@/lib/hooks/use-projects";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
 import { formatDate } from "@/lib/format";
+import { PageHeader } from "@/components/page-header";
 
 const columns: Column<Project>[] = [
   {
@@ -34,23 +35,24 @@ export default function ProjectsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Projects</h1>
+      <PageHeader title="Projects">
         <CreateProjectDialog />
+      </PageHeader>
+      <div className="p-6">
+        <DataTable
+          columns={columns}
+          data={projects}
+          isLoading={isLoading}
+          keyFn={(project) => project.id}
+          onRowClick={(project) => router.push(`/${project.id}/crons`)}
+          emptyState={
+            <div className="text-center py-12">
+              <p className="text-muted-foreground mb-4">No projects yet. Create one to get started.</p>
+              <CreateProjectDialog />
+            </div>
+          }
+        />
       </div>
-      <DataTable
-        columns={columns}
-        data={projects}
-        isLoading={isLoading}
-        keyFn={(project) => project.id}
-        onRowClick={(project) => router.push(`/${project.id}/crons`)}
-        emptyState={
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No projects yet. Create one to get started.</p>
-            <CreateProjectDialog />
-          </div>
-        }
-      />
     </div>
   );
 }

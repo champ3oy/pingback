@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { useLogs } from "@/lib/hooks/use-logs";
+import { PageHeader } from "@/components/page-header";
 
 export default function LogsPage() {
   const params = useParams();
@@ -29,8 +30,7 @@ export default function LogsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Logs</h1>
+      <PageHeader title="Logs">
         <form onSubmit={handleSearch} className="flex gap-2">
           <Input
             placeholder="Search logs..."
@@ -42,8 +42,9 @@ export default function LogsPage() {
             <Search className="h-4 w-4" />
           </Button>
         </form>
-      </div>
+      </PageHeader>
 
+      <div className="p-6">
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -96,6 +97,7 @@ export default function LogsPage() {
           </div>
         </>
       )}
+      </div>
     </div>
   );
 }

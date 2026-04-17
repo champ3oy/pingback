@@ -11,6 +11,7 @@ import { Check, Copy } from "lucide-react";
 import { useProject, useDeleteProject } from "@/lib/hooks/use-projects";
 import { apiClient } from "@/lib/api";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/page-header";
 
 export default function ProjectSettingsPage() {
   const params = useParams();
@@ -69,9 +70,10 @@ export default function ProjectSettingsPage() {
   if (!project) return null;
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Project Settings</h1>
-
+    <div>
+      <PageHeader title="Project Settings" />
+      <div className="p-6">
+      <div className="max-w-2xl">
       <Card className="mb-6">
         <CardHeader><CardTitle className="text-lg">General</CardTitle></CardHeader>
         <CardContent>
@@ -123,6 +125,8 @@ export default function ProjectSettingsPage() {
           <Button variant="destructive" onClick={handleDelete}>Delete project</Button>
         </CardContent>
       </Card>
+      </div>
+      </div>
     </div>
   );
 }

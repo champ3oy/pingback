@@ -49,29 +49,36 @@ export function DataTable<T>({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const allIds = data?.map(keyFn) || [];
-  const allSelected = allIds.length > 0 && allIds.every((id) => selectedIds.has(id));
+  const allSelected =
+    allIds.length > 0 && allIds.every((id) => selectedIds.has(id));
   const someSelected = allIds.some((id) => selectedIds.has(id));
 
-  const toggleAll = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    const next = new Set<string>();
-    if (!allSelected) {
-      allIds.forEach((id) => next.add(id));
-    }
-    setSelectedIds(next);
-    onSelectionChange?.(Array.from(next));
-  }, [allIds, allSelected, onSelectionChange]);
-
-  const toggleOne = useCallback((e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+  const toggleAll = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const next = new Set<string>();
+      if (!allSelected) {
+        allIds.forEach((id) => next.add(id));
+      }
+      setSelectedIds(next);
       onSelectionChange?.(Array.from(next));
-      return next;
-    });
-  }, [onSelectionChange]);
+    },
+    [allIds, allSelected, onSelectionChange],
+  );
+
+  const toggleOne = useCallback(
+    (e: React.MouseEvent, id: string) => {
+      e.stopPropagation();
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        onSelectionChange?.(Array.from(next));
+        return next;
+      });
+    },
+    [onSelectionChange],
+  );
 
   function handleRowClick(item: T) {
     const id = keyFn(item);

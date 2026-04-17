@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { DataTable, type Column } from "@/components/data-table";
 import { useJobs, type Job } from "@/lib/hooks/use-jobs";
 import { formatDateTime } from "@/lib/format";
+import { PageHeader } from "@/components/page-header";
 
 const columns: Column<Job>[] = [
   {
@@ -64,16 +65,18 @@ export default function CronsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Crons</h1>
-      <DataTable
-        columns={columns}
-        data={jobs}
-        isLoading={isLoading}
-        keyFn={(job) => job.id}
-        emptyState={
-          <EmptyState icon={Clock} title="No crons yet" description="Functions registered via the SDK will appear here." />
-        }
-      />
+      <PageHeader title="Crons" />
+      <div className="p-6">
+        <DataTable
+          columns={columns}
+          data={jobs}
+          isLoading={isLoading}
+          keyFn={(job) => job.id}
+          emptyState={
+            <EmptyState icon={Clock} title="No crons yet" description="Functions registered via the SDK will appear here." />
+          }
+        />
+      </div>
     </div>
   );
 }

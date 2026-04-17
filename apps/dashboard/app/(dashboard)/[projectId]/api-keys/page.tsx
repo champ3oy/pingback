@@ -11,6 +11,7 @@ import { ApiKeyCreatedDialog } from "@/components/api-key-created-dialog";
 import { useApiKeys, useRevokeApiKey, type ApiKey } from "@/lib/hooks/use-api-keys";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
+import { PageHeader } from "@/components/page-header";
 
 export default function ApiKeysPage() {
   const params = useParams();
@@ -71,22 +72,23 @@ export default function ApiKeysPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">API Keys</h1>
+      <PageHeader title="API Keys">
         <CreateApiKeyDialog projectId={projectId} onCreated={(key) => setCreatedKey(key)} />
+      </PageHeader>
+
+      <div className="p-6">
+        <ApiKeyCreatedDialog apiKey={createdKey} onClose={() => setCreatedKey(null)} />
+
+        <DataTable
+          columns={columns}
+          data={apiKeys}
+          isLoading={isLoading}
+          keyFn={(key) => key.id}
+          emptyState={
+            <EmptyState icon={Key} title="No API keys" description="Create an API key to connect your app to Pingback." />
+          }
+        />
       </div>
-
-      <ApiKeyCreatedDialog apiKey={createdKey} onClose={() => setCreatedKey(null)} />
-
-      <DataTable
-        columns={columns}
-        data={apiKeys}
-        isLoading={isLoading}
-        keyFn={(key) => key.id}
-        emptyState={
-          <EmptyState icon={Key} title="No API keys" description="Create an API key to connect your app to Pingback." />
-        }
-      />
     </div>
   );
 }
