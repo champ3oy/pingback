@@ -50,8 +50,10 @@ export function withPingback(nextConfig: any = {}): any {
   return {
     ...nextConfig,
     webpack(config: any, context: any) {
-      if (context.isServer && !context.dev) {
-        runPingbackBuild(context.dir).catch((err: Error) => {
+      if (context.isServer) {
+        // Generate route in both dev and production
+        // Only register with platform in production builds
+        runPingbackBuild(context.dir, !context.dev).catch((err: Error) => {
           console.error('[pingback] Build failed:', err.message);
         });
       }
@@ -64,7 +66,7 @@ export function withPingback(nextConfig: any = {}): any {
   };
 }
 
-async function runPingbackBuild(projectRoot: string): Promise<void> {
+async function runPingbackBuild(projectRoot: string, shouldRegister = true): Promise<void> {
   const config = await loadConfig(projectRoot);
   const files = await discoverFunctionFiles(projectRoot, config.functionsDir);
 
@@ -82,7 +84,7 @@ async function runPingbackBuild(projectRoot: string): Promise<void> {
     }
   }
 
-  if (files.length > 0) {
+  if (files.length > 0 && shouldRegister) {
     for (const file of files) {
       try { await import(file); } catch {}
     }
