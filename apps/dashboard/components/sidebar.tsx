@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { Clock, ListChecks, Play, Terminal, Key, Bell, FolderOpen, Settings } from "lucide-react";
+import {
+  Clock,
+  ListChecks,
+  Play,
+  Terminal,
+  Key,
+  Bell,
+  FolderOpen,
+  Settings,
+} from "lucide-react";
 import { ProjectSwitcher } from "./project-switcher";
 import { UserMenu } from "./user-menu";
 import { cn } from "@/lib/utils";
@@ -17,9 +26,7 @@ const projectNav = [
   { name: "Settings", href: "settings", icon: Settings },
 ];
 
-const accountNav = [
-  { name: "Projects", href: "/projects", icon: FolderOpen },
-];
+const accountNav = [{ name: "Projects", href: "/projects", icon: FolderOpen }];
 
 export function Sidebar() {
   const params = useParams();
@@ -27,7 +34,7 @@ export function Sidebar() {
   const projectId = params.projectId as string;
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-60 border-r flex flex-col bg-background">
+    <aside className="fixed left-0 top-0 h-screen w-52 border-r flex flex-col bg-background">
       <div className="h-12 flex items-center px-3 border-b">
         <ProjectSwitcher />
       </div>
@@ -49,7 +56,7 @@ export function Sidebar() {
                     "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors",
                     isActive
                       ? "text-foreground bg-secondary border-l-2 border-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary",
                   )}
                 >
                   <item.icon className="h-4 w-4" />
@@ -74,7 +81,7 @@ export function Sidebar() {
                   "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors",
                   isActive
                     ? "text-foreground bg-secondary border-l-2 border-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary",
                 )}
               >
                 <item.icon className="h-4 w-4" />
