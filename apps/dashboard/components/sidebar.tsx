@@ -28,7 +28,7 @@ export function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-60 border-r flex flex-col bg-background">
-      <div className="p-3 border-b">
+      <div className="h-12 flex items-center px-3 border-b">
         <ProjectSwitcher />
       </div>
 
