@@ -6,3 +6,4 @@ dist/
 !shared/types/src/**/*.d.ts
 coverage/
 .turbo/
+.worktrees/
