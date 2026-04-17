@@ -12,6 +12,7 @@ import { QueueService } from './queue.service';
       useFactory: async (config: ConfigService) => {
         const boss = new PgBoss(config.get<string>('database.url') as string);
         await boss.start();
+        await boss.createQueue('pingback-execution');
         return boss;
       },
     },
