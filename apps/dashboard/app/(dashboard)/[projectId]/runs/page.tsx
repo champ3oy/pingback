@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { Play, ChevronDown, ChevronRight, Copy, Check, CircleCheck, CircleX, Clock, Loader2 } from "lucide-react";
 import {
@@ -226,9 +226,8 @@ export default function RunsPage() {
               </TableHeader>
               <TableBody>
                 {data.items.map((exec, index) => (
-                  <>
+                  <React.Fragment key={exec.id}>
                     <TableRow
-                      key={exec.id}
                       className={`cursor-pointer hover:bg-secondary/50 ${expandedId === exec.id ? "bg-secondary/30" : ""}`}
                       onClick={() => toggleRow(exec.id)}
                     >
@@ -263,13 +262,13 @@ export default function RunsPage() {
                       </TableCell>
                     </TableRow>
                     {expandedId === exec.id && (
-                      <TableRow key={`${exec.id}-detail`}>
+                      <TableRow>
                         <TableCell colSpan={8} className="p-0">
                           <RunDetail exec={exec} />
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>
