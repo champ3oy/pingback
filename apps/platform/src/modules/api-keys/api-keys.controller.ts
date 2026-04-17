@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProjectsService } from '../projects/projects.service';
 import { ApiKeysService } from './api-keys.service';
 import { CreateApiKeyDto } from './dto/create-api-key.dto';
+import { ApiKeyCreatedResponse, ApiKeyResponse } from './dto/api-key-response.dto';
 
 @ApiTags('API Keys')
 @ApiBearerAuth('jwt')
@@ -28,7 +29,7 @@ export class ApiKeysController {
   @Post()
   @ApiOperation({ summary: 'Create a new API key for a project' })
   @ApiParam({ name: 'projectId', description: 'Project UUID' })
-  @ApiResponse({ status: 201, description: 'API key created (raw key returned only once)' })
+  @ApiResponse({ status: 201, description: 'API key created (raw key returned only once)', type: ApiKeyCreatedResponse })
   async create(
     @Req() req: Request,
     @Param('projectId') projectId: string,
@@ -42,7 +43,7 @@ export class ApiKeysController {
   @Get()
   @ApiOperation({ summary: 'List all API keys for a project' })
   @ApiParam({ name: 'projectId', description: 'Project UUID' })
-  @ApiResponse({ status: 200, description: 'List of API keys' })
+  @ApiResponse({ status: 200, description: 'List of API keys', type: [ApiKeyResponse] })
   async findAll(
     @Req() req: Request,
     @Param('projectId') projectId: string,

@@ -12,6 +12,7 @@ import { ApiKeyGuard } from '../auth/api-key.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProjectsService } from '../projects/projects.service';
 import { ExecutionsService } from './executions.service';
+import { ExecutionResponse, PaginatedExecutionsResponse } from './dto/execution-response.dto';
 
 @ApiTags('Executions')
 @ApiBearerAuth('api-key')
@@ -25,7 +26,7 @@ export class ExecutionsApiController {
   @ApiParam({ name: 'jobId', description: 'Job UUID' })
   @ApiQuery({ name: 'page', required: false, description: 'Page number (default 1)' })
   @ApiQuery({ name: 'limit', required: false, description: 'Items per page (default 20)' })
-  @ApiResponse({ status: 200, description: 'Paginated list of executions' })
+  @ApiResponse({ status: 200, description: 'Paginated list of executions', type: PaginatedExecutionsResponse })
   findByJob(
     @Param('jobId') jobId: string,
     @Query('page') page?: string,
@@ -41,7 +42,7 @@ export class ExecutionsApiController {
   @Get('executions/:id')
   @ApiOperation({ summary: 'Get a single execution by ID' })
   @ApiParam({ name: 'id', description: 'Execution UUID' })
-  @ApiResponse({ status: 200, description: 'Execution details' })
+  @ApiResponse({ status: 200, description: 'Execution details', type: ExecutionResponse })
   @ApiResponse({ status: 404, description: 'Execution not found' })
   findOne(@Param('id') id: string) {
     return this.executionsService.findOne(id);
@@ -67,7 +68,7 @@ export class ExecutionsDashboardController {
   @ApiQuery({ name: 'dateTo', required: false, description: 'End date filter (ISO 8601)' })
   @ApiQuery({ name: 'page', required: false, description: 'Page number (default 1)' })
   @ApiQuery({ name: 'limit', required: false, description: 'Items per page (default 20)' })
-  @ApiResponse({ status: 200, description: 'Paginated list of executions' })
+  @ApiResponse({ status: 200, description: 'Paginated list of executions', type: PaginatedExecutionsResponse })
   async findByProject(
     @Req() req: Request,
     @Param('projectId') projectId: string,
@@ -94,7 +95,7 @@ export class ExecutionsDashboardController {
   @ApiOperation({ summary: 'Get a single execution by ID (dashboard)' })
   @ApiParam({ name: 'projectId', description: 'Project UUID' })
   @ApiParam({ name: 'id', description: 'Execution UUID' })
-  @ApiResponse({ status: 200, description: 'Execution details' })
+  @ApiResponse({ status: 200, description: 'Execution details', type: ExecutionResponse })
   async findOne(
     @Req() req: Request,
     @Param('projectId') projectId: string,

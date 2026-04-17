@@ -13,6 +13,7 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { ProjectResponse } from './dto/project-response.dto';
 
 @ApiTags('Projects')
 @ApiBearerAuth('jwt')
@@ -23,7 +24,7 @@ export class ProjectsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new project' })
-  @ApiResponse({ status: 201, description: 'Project created' })
+  @ApiResponse({ status: 201, description: 'Project created', type: ProjectResponse })
   create(@Req() req: Request, @Body() dto: CreateProjectDto) {
     const user = req.user as { id: string };
     return this.projectsService.create(user.id, dto);
@@ -31,7 +32,7 @@ export class ProjectsController {
 
   @Get()
   @ApiOperation({ summary: 'List all projects for the authenticated user' })
-  @ApiResponse({ status: 200, description: 'List of projects' })
+  @ApiResponse({ status: 200, description: 'List of projects', type: [ProjectResponse] })
   findAll(@Req() req: Request) {
     const user = req.user as { id: string };
     return this.projectsService.findAllByUser(user.id);
@@ -40,7 +41,7 @@ export class ProjectsController {
   @Get(':projectId')
   @ApiOperation({ summary: 'Get a project by ID' })
   @ApiParam({ name: 'projectId', description: 'Project UUID' })
-  @ApiResponse({ status: 200, description: 'Project details' })
+  @ApiResponse({ status: 200, description: 'Project details', type: ProjectResponse })
   @ApiResponse({ status: 404, description: 'Project not found' })
   findOne(@Req() req: Request, @Param('projectId') projectId: string) {
     const user = req.user as { id: string };

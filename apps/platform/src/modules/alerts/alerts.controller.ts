@@ -17,6 +17,7 @@ import { ProjectsService } from '../projects/projects.service';
 import { AlertsService } from './alerts.service';
 import { CreateAlertDto } from './dto/create-alert.dto';
 import { UpdateAlertDto } from './dto/update-alert.dto';
+import { AlertResponse } from './dto/alert-response.dto';
 
 @ApiTags('Alerts')
 @ApiBearerAuth('jwt')
@@ -31,7 +32,7 @@ export class AlertsController {
   @Post()
   @ApiOperation({ summary: 'Create a new alert' })
   @ApiParam({ name: 'projectId', description: 'Project UUID' })
-  @ApiResponse({ status: 201, description: 'Alert created' })
+  @ApiResponse({ status: 201, description: 'Alert created', type: AlertResponse })
   async create(
     @Req() req: Request,
     @Param('projectId') projectId: string,
@@ -46,7 +47,7 @@ export class AlertsController {
   @ApiOperation({ summary: 'List alerts for a project' })
   @ApiParam({ name: 'projectId', description: 'Project UUID' })
   @ApiQuery({ name: 'jobId', required: false, description: 'Filter by job ID' })
-  @ApiResponse({ status: 200, description: 'List of alerts' })
+  @ApiResponse({ status: 200, description: 'List of alerts', type: [AlertResponse] })
   async findAll(
     @Req() req: Request,
     @Param('projectId') projectId: string,
@@ -61,7 +62,7 @@ export class AlertsController {
   @ApiOperation({ summary: 'Update an alert' })
   @ApiParam({ name: 'projectId', description: 'Project UUID' })
   @ApiParam({ name: 'id', description: 'Alert UUID' })
-  @ApiResponse({ status: 200, description: 'Alert updated' })
+  @ApiResponse({ status: 200, description: 'Alert updated', type: AlertResponse })
   async update(
     @Req() req: Request,
     @Param('projectId') projectId: string,

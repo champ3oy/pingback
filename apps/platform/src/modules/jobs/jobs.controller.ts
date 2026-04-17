@@ -18,6 +18,7 @@ import { ProjectsService } from '../projects/projects.service';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { JobResponse } from './dto/job-response.dto';
 
 @ApiTags('Jobs')
 @ApiBearerAuth('api-key')
@@ -28,7 +29,7 @@ export class JobsApiController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new job' })
-  @ApiResponse({ status: 201, description: 'Job created' })
+  @ApiResponse({ status: 201, description: 'Job created', type: JobResponse })
   create(@Req() req: Request, @Body() dto: CreateJobDto) {
     const { project } = req.user as any;
     return this.jobsService.create(project.id, dto);
@@ -37,7 +38,7 @@ export class JobsApiController {
   @Get()
   @ApiOperation({ summary: 'List all jobs for the project' })
   @ApiQuery({ name: 'status', required: false, description: 'Filter by status (active, paused)' })
-  @ApiResponse({ status: 200, description: 'List of jobs' })
+  @ApiResponse({ status: 200, description: 'List of jobs', type: [JobResponse] })
   findAll(@Req() req: Request, @Query('status') status?: string) {
     const { project } = req.user as any;
     return this.jobsService.findAllByProject(project.id, { status });
@@ -46,7 +47,7 @@ export class JobsApiController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a job by ID' })
   @ApiParam({ name: 'id', description: 'Job UUID' })
-  @ApiResponse({ status: 200, description: 'Job details' })
+  @ApiResponse({ status: 200, description: 'Job details', type: JobResponse })
   @ApiResponse({ status: 404, description: 'Job not found' })
   findOne(@Req() req: Request, @Param('id') id: string) {
     const { project } = req.user as any;
@@ -56,7 +57,7 @@ export class JobsApiController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update a job' })
   @ApiParam({ name: 'id', description: 'Job UUID' })
-  @ApiResponse({ status: 200, description: 'Job updated' })
+  @ApiResponse({ status: 200, description: 'Job updated', type: JobResponse })
   update(
     @Req() req: Request,
     @Param('id') id: string,
@@ -91,7 +92,7 @@ export class JobsDashboardController {
   @ApiParam({ name: 'projectId', description: 'Project UUID' })
   @ApiQuery({ name: 'status', required: false, description: 'Filter by status' })
   @ApiQuery({ name: 'type', required: false, description: 'Filter by type (cron, task)' })
-  @ApiResponse({ status: 200, description: 'List of jobs' })
+  @ApiResponse({ status: 200, description: 'List of jobs', type: [JobResponse] })
   async findAll(
     @Req() req: Request,
     @Param('projectId') projectId: string,
@@ -107,7 +108,7 @@ export class JobsDashboardController {
   @ApiOperation({ summary: 'Get a job by ID (dashboard)' })
   @ApiParam({ name: 'projectId', description: 'Project UUID' })
   @ApiParam({ name: 'id', description: 'Job UUID' })
-  @ApiResponse({ status: 200, description: 'Job details' })
+  @ApiResponse({ status: 200, description: 'Job details', type: JobResponse })
   async findOne(
     @Req() req: Request,
     @Param('projectId') projectId: string,
@@ -122,7 +123,7 @@ export class JobsDashboardController {
   @ApiOperation({ summary: 'Update a job (dashboard)' })
   @ApiParam({ name: 'projectId', description: 'Project UUID' })
   @ApiParam({ name: 'id', description: 'Job UUID' })
-  @ApiResponse({ status: 200, description: 'Job updated' })
+  @ApiResponse({ status: 200, description: 'Job updated', type: JobResponse })
   async update(
     @Req() req: Request,
     @Param('projectId') projectId: string,

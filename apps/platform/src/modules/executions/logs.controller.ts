@@ -11,6 +11,7 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProjectsService } from '../projects/projects.service';
 import { LogsService } from './logs.service';
+import { PaginatedLogsResponse } from './dto/execution-response.dto';
 
 @ApiTags('Logs')
 @ApiBearerAuth('jwt')
@@ -31,7 +32,7 @@ export class LogsController {
   @ApiQuery({ name: 'q', required: false, description: 'Full-text search query' })
   @ApiQuery({ name: 'page', required: false, description: 'Page number (default 1)' })
   @ApiQuery({ name: 'limit', required: false, description: 'Items per page (default 50)' })
-  @ApiResponse({ status: 200, description: 'Paginated list of logs' })
+  @ApiResponse({ status: 200, description: 'Paginated list of logs', type: PaginatedLogsResponse })
   async findAll(
     @Req() req: Request,
     @Param('projectId') projectId: string,

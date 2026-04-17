@@ -16,6 +16,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { AuthTokensResponse } from './dto/auth-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -27,7 +28,7 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user account' })
-  @ApiResponse({ status: 201, description: 'User registered successfully' })
+  @ApiResponse({ status: 201, description: 'User registered successfully', type: AuthTokensResponse })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 409, description: 'Email already in use' })
   register(@Body() dto: RegisterDto) {
@@ -36,7 +37,7 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({ summary: 'Log in with email and password' })
-  @ApiResponse({ status: 200, description: 'Login successful, returns tokens' })
+  @ApiResponse({ status: 200, description: 'Login successful, returns tokens', type: AuthTokensResponse })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
@@ -46,7 +47,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access and refresh tokens' })
-  @ApiResponse({ status: 200, description: 'Tokens refreshed successfully' })
+  @ApiResponse({ status: 200, description: 'Tokens refreshed successfully', type: AuthTokensResponse })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   refresh(@Req() req: Request, @Body() dto: RefreshDto) {
     const user = req.user as { id: string };
