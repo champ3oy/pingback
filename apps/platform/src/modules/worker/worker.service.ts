@@ -34,8 +34,9 @@ export class WorkerService implements OnModuleInit {
     this.logger.log('Worker subscribed to pingback-execution queue');
   }
 
-  async processJob(job: { data: QueueMessage }) {
-    const msg = job.data;
+  async processJob(job: any) {
+    // pgboss v10 passes data directly on the job object, or under .data
+    const msg: QueueMessage = job.data || job;
 
     try {
       await this.executionsService.markRunning(msg.executionId);
