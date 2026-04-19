@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GridSection } from "./grid-section";
 
 const links = {
   Product: [
@@ -17,7 +18,7 @@ const links = {
 export function Footer() {
   return (
     <footer>
-      <div className="max-w-5xl mx-auto border-x">
+      <GridSection>
         <div className="grid grid-cols-2 md:grid-cols-4 border-t">
           <div className="p-8 col-span-2 md:col-span-1 md:border-r border-b md:border-b-0">
             <p className="text-lg font-semibold mb-2">Pingback</p>
@@ -51,7 +52,7 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Pingback. All rights reserved.
           </p>
         </div>
-      </div>
+      </GridSection>
     </footer>
   );
 }

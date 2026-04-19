@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { CodeSnippet } from "./code-snippet";
+import { GridSection } from "./grid-section";
 
 export function Hero() {
   return (
-    <section className="border-b">
-      <div className="max-w-5xl mx-auto border-x">
+    <GridSection>
         <div className="py-24 px-6 text-center">
           <h1 className="text-5xl font-bold tracking-tight leading-[1.1] mb-4">
             Reliable cron jobs for
@@ -33,7 +33,6 @@ export function Hero() {
         <div className="border-t px-6 py-8">
           <CodeSnippet />
         </div>
-      </div>
-    </section>
+    </GridSection>
   );
 }

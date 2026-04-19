@@ -1,3 +1,5 @@
+import { GridSection } from "./grid-section";
+
 const steps = [
   {
     number: "01",
@@ -43,8 +45,7 @@ export const cleanup = cron(
 
 export function Workflow() {
   return (
-    <section className="border-b">
-      <div className="max-w-5xl mx-auto border-x">
+    <GridSection>
         <div className="py-20 px-6 text-center">
           <h2 className="text-3xl font-bold tracking-tight mb-3">
             Get started in 3 steps
@@ -71,7 +72,6 @@ export function Workflow() {
             </div>
           ))}
         </div>
-      </div>
-    </section>
+    </GridSection>
   );
 }

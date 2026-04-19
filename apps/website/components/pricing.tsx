@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GridSection } from "./grid-section";
 
 const tiers = [
   {
@@ -49,8 +50,7 @@ const tiers = [
 
 export function Pricing() {
   return (
-    <section id="pricing" className="border-b">
-      <div className="max-w-5xl mx-auto border-x">
+    <GridSection>
         <div className="py-20 px-6 text-center">
           <h2 className="text-3xl font-bold tracking-tight mb-3">
             Simple, predictable pricing
@@ -120,7 +120,6 @@ export function Pricing() {
             </div>
           ))}
         </div>
-      </div>
-    </section>
+    </GridSection>
   );
 }

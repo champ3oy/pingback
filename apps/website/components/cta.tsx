@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { GridSection } from "./grid-section";
 
 export function CTA() {
   return (
-    <section className="border-b">
-      <div className="max-w-5xl mx-auto border-x py-24 px-6 text-center">
+    <GridSection className="py-24 px-6 text-center">
         <h2 className="text-3xl font-bold tracking-tight mb-3">
           Start running crons in under 10 minutes.
         </h2>
@@ -14,7 +14,6 @@ export function CTA() {
         >
           Get Started
         </Link>
-      </div>
-    </section>
+    </GridSection>
   );
 }

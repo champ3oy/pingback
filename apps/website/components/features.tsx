@@ -1,3 +1,5 @@
+import { GridSection } from "./grid-section";
+
 const features = [
   {
     title: "Automatic Retries",
@@ -23,8 +25,7 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="border-b">
-      <div className="max-w-5xl mx-auto border-x">
+    <GridSection>
         <div className="py-20 px-6 text-center">
           <h2 className="text-3xl font-bold tracking-tight mb-3">
             Everything you need for reliable background jobs
@@ -46,7 +47,6 @@ export function Features() {
             </div>
           ))}
         </div>
-      </div>
-    </section>
+    </GridSection>
   );
 }
