@@ -29,7 +29,7 @@ export function Navbar() {
           </Link>
           <Link
             href="https://app.pingback.dev/register"
-            className="text-sm bg-foreground text-background px-4 py-1.5 rounded-full hover:opacity-90 transition-opacity"
+            className="text-sm bg-accent text-accent-foreground px-4 py-1.5 rounded-full hover:opacity-90 transition-opacity"
           >
             Get Started
           </Link>

@@ -75,7 +75,7 @@ export function Pricing() {
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-lg font-semibold">{tier.name}</h3>
                   {tier.highlight && (
-                    <span className="text-[10px] font-medium bg-foreground text-background px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-medium bg-accent text-accent-foreground px-2 py-0.5 rounded-full">
                       Popular
                     </span>
                   )}
@@ -95,7 +95,7 @@ export function Pricing() {
                     className="text-sm text-muted-foreground flex items-start gap-2"
                   >
                     <svg
-                      className="h-4 w-4 text-foreground shrink-0 mt-0.5"
+                      className={`h-4 w-4 shrink-0 mt-0.5 ${tier.highlight ? "text-accent" : "text-foreground"}`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -115,7 +115,7 @@ export function Pricing() {
                 href="https://app.pingback.dev/register"
                 className={`text-sm font-medium text-center py-2.5 rounded-full transition-opacity ${
                   tier.highlight
-                    ? "bg-foreground text-background hover:opacity-90"
+                    ? "bg-accent text-accent-foreground hover:opacity-90"
                     : "border hover:bg-muted"
                 }`}
               >

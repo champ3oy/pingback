@@ -65,7 +65,7 @@ export function Workflow() {
               className={`p-8 ${i < 2 ? "md:border-r" : ""} border-b md:border-b-0`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs text-muted-foreground font-mono">
+                <span className="text-xs text-accent font-mono font-semibold">
                   {step.number}.
                 </span>
                 <span className="text-xs text-muted-foreground">

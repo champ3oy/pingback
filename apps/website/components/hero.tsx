@@ -18,7 +18,7 @@ export function Hero() {
           <div className="flex items-center justify-center gap-3 mb-16">
             <Link
               href="https://app.pingback.dev/register"
-              className="bg-foreground text-background px-6 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
+              className="bg-accent text-accent-foreground px-6 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
             >
               Get Started
             </Link>

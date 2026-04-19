@@ -52,6 +52,7 @@ export function Features() {
               {i === 1 && (
                 <GridDot className="-bottom-[5px] -right-[5px]" />
               )}
+              <div className="w-2 h-2 rounded-full bg-accent mb-3" />
               <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {feature.description}
