@@ -1,11 +1,13 @@
-import { Context, LogEntry, ExecutionPayload } from './types';
+import { Context, LogEntry, ExecutionPayload, TaskRequest } from './types';
 
-export interface ContextWithLogs extends Context {
+export interface ContextWithInternals extends Context {
   _getLogs(): LogEntry[];
+  _getTasks(): TaskRequest[];
 }
 
-export function createContext(payload: ExecutionPayload): ContextWithLogs {
+export function createContext(payload: ExecutionPayload): ContextWithInternals {
   const logs: LogEntry[] = [];
+  const tasks: TaskRequest[] = [];
 
   return {
     executionId: payload.executionId,
@@ -16,14 +18,16 @@ export function createContext(payload: ExecutionPayload): ContextWithLogs {
       logs.push({ timestamp: Date.now(), message });
     },
 
-    async task(_name: string, _payload: any): Promise<void> {
-      throw new Error(
-        'ctx.task() is not available in the current plan. Upgrade to Pro for fan-out tasks.',
-      );
+    async task(name: string, taskPayload: any): Promise<void> {
+      tasks.push({ name, payload: taskPayload });
     },
 
     _getLogs(): LogEntry[] {
       return logs;
+    },
+
+    _getTasks(): TaskRequest[] {
+      return tasks;
     },
   };
 }

@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { createContext } from '@pingback/core';
-import type { ContextWithLogs, ExecutionPayload } from '@pingback/core';
+import type { ContextWithInternals, ExecutionPayload } from '@pingback/core';
 import { registry } from './functions';
 
 function verifyWorkerSignature(
@@ -56,7 +56,7 @@ export function createRouteHandler() {
       );
     }
 
-    const ctx = createContext(payload) as ContextWithLogs;
+    const ctx = createContext(payload) as ContextWithInternals;
     const start = Date.now();
 
     try {
