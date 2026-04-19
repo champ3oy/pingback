@@ -15,7 +15,7 @@ import { EmptyState } from "@/components/empty-state";
 import { StatusBadge } from "@/components/status-badge";
 import { CodeBlock } from "@/components/code-block";
 import { DataTable, type Column } from "@/components/data-table";
-import { useExecutions, type Execution } from "@/lib/hooks/use-executions";
+import { useExecutions, useChildExecutions, type Execution } from "@/lib/hooks/use-executions";
 import { formatDateTime, formatDuration } from "@/lib/format";
 import { PageHeader } from "@/components/page-header";
 
@@ -44,7 +44,56 @@ const statusIcon: Record<string, React.ReactNode> = {
   pending: <IconClockFilled className="h-4 w-4 text-yellow-500" />,
 };
 
-function RunDetail({ exec }: { exec: Execution }) {
+function ChildTasks({ projectId, parentId }: { projectId: string; parentId: string }) {
+  const { data, isLoading } = useChildExecutions(projectId, parentId);
+
+  if (isLoading) {
+    return (
+      <div className="p-4 border-t border-border">
+        <p className="text-sm font-medium mb-3">Child Tasks</p>
+        <p className="text-xs text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!data?.items?.length) return null;
+
+  return (
+    <div className="p-4 border-t border-border">
+      <p className="text-sm font-medium mb-3">Child Tasks ({data.total})</p>
+      <div className="rounded border border-border overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-secondary/30">
+              <th className="p-2 text-left text-xs font-medium text-muted-foreground">Name</th>
+              <th className="p-2 text-left text-xs font-medium text-muted-foreground">Status</th>
+              <th className="p-2 text-left text-xs font-medium text-muted-foreground">Duration</th>
+              <th className="p-2 text-left text-xs font-medium text-muted-foreground">Attempt</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.items.map((child) => (
+              <tr key={child.id} className="border-b last:border-0">
+                <td className="p-2">
+                  <span className="font-medium">{child.job?.name || child.jobId.slice(0, 8)}</span>
+                </td>
+                <td className="p-2">
+                  <StatusBadge status={child.status} />
+                </td>
+                <td className="p-2 text-muted-foreground">
+                  {formatDuration(child.durationMs)}
+                </td>
+                <td className="p-2 text-muted-foreground">{child.attempt}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function RunDetail({ exec, projectId }: { exec: Execution; projectId: string }) {
   const formattedOutput = (() => {
     if (!exec.responseBody) return null;
     try {
@@ -58,6 +107,13 @@ function RunDetail({ exec }: { exec: Execution }) {
 
   return (
     <div className="border-t border-border bg-background">
+      {exec.parentId && (
+        <div className="px-4 pt-3 pb-0">
+          <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-purple-500/10 text-purple-500">
+            Child Task
+          </span>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-border">
         <div className="p-4 pb-3">
           <div className="grid grid-cols-3 gap-4 mb-4">
@@ -196,6 +252,7 @@ function RunDetail({ exec }: { exec: Execution }) {
           )}
         </div>
       </div>
+      <ChildTasks projectId={projectId} parentId={exec.id} />
     </div>
   );
 }
@@ -280,7 +337,7 @@ export default function RunsPage() {
           data={data?.items}
           isLoading={isLoading}
           keyFn={(exec) => exec.id}
-          expandable={{ render: (exec) => <RunDetail exec={exec} /> }}
+          expandable={{ render: (exec) => <RunDetail exec={exec} projectId={projectId} /> }}
           emptyState={
             <EmptyState
               icon={IconPlayerPlayFilled}
