@@ -3,7 +3,9 @@ import Link from "next/link";
 export function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
-      <div className="max-w-5xl mx-auto border-x">
+      <div className="max-w-5xl mx-auto border-x relative">
+        <div className="absolute -bottom-[5px] -left-[5px] w-2.5 h-2.5 rotate-45 border border-border bg-background z-10 hidden md:block" />
+        <div className="absolute -bottom-[5px] -right-[5px] w-2.5 h-2.5 rotate-45 border border-border bg-background z-10 hidden md:block" />
         <div className="flex items-center justify-between h-14 px-6">
         <Link href="/" className="text-lg font-semibold tracking-tight">
           Pingback
