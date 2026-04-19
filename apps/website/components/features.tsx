@@ -5,21 +5,25 @@ const features = [
     title: "Automatic Retries",
     description:
       "Configurable retry policies with exponential backoff. Jobs recover from transient failures without intervention.",
+    color: "#3b82f6",
   },
   {
     title: "Execution Logs",
     description:
       "Structured logging via ctx.log(). Search and filter logs across all jobs in the dashboard.",
+    color: "#22c55e",
   },
   {
     title: "Fan-Out Tasks",
     description:
       "Spawn independent sub-tasks with ctx.task(). Each runs with its own retries, timeout, and tracking.",
+    color: "#f59e0b",
   },
   {
     title: "Real-Time Monitoring",
     description:
       "Live execution status, duration tracking, and email alerts on failures. See every run in your dashboard.",
+    color: "#8b5cf6",
   },
 ];
 
@@ -52,7 +56,7 @@ export function Features() {
               {i === 1 && (
                 <GridDot className="-bottom-[5px] -right-[5px]" />
               )}
-              <div className="w-2 h-2 rounded-full bg-accent mb-3" />
+              <div className="w-2 h-2 rounded-full mb-3" style={{ backgroundColor: feature.color }} />
               <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {feature.description}
