@@ -24,7 +24,7 @@ export function Hero() {
             </Link>
             <Link
               href="https://docs.pingback.dev"
-              className="border px-6 py-2.5 rounded-full text-sm font-medium hover:bg-muted transition-colors"
+              className="bg-muted px-6 py-2.5 rounded-full text-sm font-medium hover:bg-muted/70 transition-colors"
             >
               Documentation
             </Link>
