@@ -6,6 +6,8 @@ import { apiClient } from "@/lib/api";
 export interface Execution {
   id: string;
   jobId: string;
+  parentId: string | null;
+  payload: any;
   status: "pending" | "running" | "success" | "failed";
   attempt: number;
   scheduledAt: string;
@@ -55,6 +57,18 @@ export function useExecution(projectId: string, executionId: string) {
     queryFn: () =>
       apiClient.get<Execution>(`/api/v1/projects/${projectId}/executions/${executionId}`),
     enabled: !!projectId && !!executionId,
+    refetchInterval: 5000,
+  });
+}
+
+export function useChildExecutions(projectId: string, parentId: string) {
+  return useQuery({
+    queryKey: ["executions", projectId, { parentId }],
+    queryFn: () =>
+      apiClient.get<PaginatedResponse<Execution>>(
+        `/api/v1/projects/${projectId}/executions?parentId=${parentId}&limit=100`
+      ),
+    enabled: !!projectId && !!parentId,
     refetchInterval: 5000,
   });
 }
