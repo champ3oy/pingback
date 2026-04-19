@@ -6,7 +6,7 @@ export function Hero() {
   return (
     <GridSection>
         <div className="py-24 px-6 text-center">
-          <h1 className="text-5xl font-bold tracking-tight leading-[1.1] mb-4">
+          <h1 className="text-5xl font-extrabold tracking-tight leading-[1.1] mb-4 font-display">
             Reliable cron jobs for
             <br />
             modern web apps.
