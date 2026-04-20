@@ -87,7 +87,28 @@ export const sendSingleEmail = task(
 );
 ```
 
-> **Note:** `ctx.task()` for fan-out is coming in a future release.
+### Fan-Out with `ctx.task()`
+
+Use `ctx.task()` inside a cron to dispatch independent sub-tasks:
+
+```ts
+import { cron, task } from "@pingback/next";
+
+export const sendEmails = cron("send-emails", "*/15 * * * *", async (ctx) => {
+  const pending = await db.emails.findPending();
+  for (const email of pending) {
+    await ctx.task("send-email", { id: email.id });
+  }
+  ctx.log(`Dispatched ${pending.length} emails`);
+});
+
+export const sendEmail = task("send-email", async (ctx, { id }) => {
+  const email = await db.emails.findById(id);
+  await mailer.send(email);
+}, { retries: 2, timeout: "15s" });
+```
+
+Each task runs independently with its own retries and timeout.
 
 ## Context Object
 
@@ -98,6 +119,7 @@ ctx.executionId  // Unique ID for this execution
 ctx.attempt      // Current retry attempt (1-indexed)
 ctx.scheduledAt  // When this run was originally scheduled
 ctx.log(message) // Add a log entry (visible in dashboard)
+ctx.task(name, payload) // Dispatch a child task (fan-out)
 ```
 
 ## Configuration

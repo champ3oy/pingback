@@ -1,6 +1,7 @@
 {
   "name": "@pingback/next",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Next.js SDK for Pingback — reliable cron jobs and background tasks",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -16,13 +17,38 @@
       "default": "./dist/handler.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest"
   },
+  "keywords": [
+    "pingback",
+    "nextjs",
+    "cron",
+    "scheduled-jobs",
+    "background-tasks",
+    "vercel",
+    "serverless"
+  ],
+  "author": "Pingback",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pingback/pingback",
+    "directory": "packages/next"
+  },
+  "homepage": "https://pingback.dev/docs/next",
+  "bugs": {
+    "url": "https://github.com/pingback/pingback/issues"
+  },
   "dependencies": {
-    "@pingback/core": "0.0.1",
+    "@pingback/core": "0.1.0",
     "glob": "^11.0.0"
   },
   "peerDependencies": {

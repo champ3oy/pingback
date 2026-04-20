@@ -1,12 +1,36 @@
 {
   "name": "@pingback/core",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Framework-agnostic core for Pingback SDKs — function registry, context, signing, and registration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest"
+  },
+  "keywords": [
+    "pingback",
+    "cron",
+    "scheduled-jobs",
+    "background-tasks",
+    "sdk"
+  ],
+  "author": "Pingback",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pingback/pingback",
+    "directory": "packages/core"
+  },
+  "homepage": "https://pingback.dev",
+  "bugs": {
+    "url": "https://github.com/pingback/pingback/issues"
   },
   "devDependencies": {
     "jest": "^29.7.0",
