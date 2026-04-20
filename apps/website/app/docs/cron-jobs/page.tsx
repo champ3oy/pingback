@@ -1,4 +1,5 @@
 import { DocsCode, InlineCode } from "@/components/docs-code";
+import { FrameworkSwitcher } from "@/components/framework-switcher";
 
 export const metadata = { title: "Cron Jobs — Pingback Docs" };
 
@@ -58,7 +59,10 @@ export default function CronJobsPage() {
       </div>
 
       <h2 className="text-xl font-semibold mt-10 mb-3">Full Example</h2>
-      <DocsCode code={`import { cron } from "@pingback/next";
+      <FrameworkSwitcher>
+        {{
+          next: (
+            <DocsCode code={`import { cron } from "@pingback/next";
 
 export const syncData = cron(
   "sync-data",
@@ -80,6 +84,9 @@ export const syncData = cron(
     concurrency: 1,
   }
 );`} />
+          ),
+        }}
+      </FrameworkSwitcher>
     </>
   );
 }

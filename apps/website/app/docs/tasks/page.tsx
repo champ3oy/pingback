@@ -1,4 +1,5 @@
 import { DocsCode, InlineCode } from "@/components/docs-code";
+import { FrameworkSwitcher } from "@/components/framework-switcher";
 
 export const metadata = { title: "Tasks — Pingback Docs" };
 
@@ -23,7 +24,10 @@ export default function TasksPage() {
         Tasks are defined the same way as crons, but without a schedule. They receive
         a payload as the second argument:
       </p>
-      <DocsCode code={`import { task } from "@pingback/next";
+      <FrameworkSwitcher>
+        {{
+          next: (
+            <DocsCode code={`import { task } from "@pingback/next";
 
 export const sendEmail = task(
   "send-email",
@@ -34,13 +38,19 @@ export const sendEmail = task(
   },
   { retries: 2, timeout: "15s" }
 );`} />
+          ),
+        }}
+      </FrameworkSwitcher>
 
       <h2 className="text-xl font-semibold mt-10 mb-3">Fan-Out Pattern</h2>
       <p className="text-sm text-muted-foreground mb-2">
         Use <InlineCode>ctx.task()</InlineCode> inside a cron to dispatch independent sub-tasks.
         Each task runs with its own retries, timeout, and tracking:
       </p>
-      <DocsCode code={`import { cron, task } from "@pingback/next";
+      <FrameworkSwitcher>
+        {{
+          next: (
+            <DocsCode code={`import { cron, task } from "@pingback/next";
 
 // Parent cron — runs every 15 minutes
 export const sendEmails = cron(
@@ -68,6 +78,9 @@ export const sendEmail = task(
   },
   { retries: 2, timeout: "15s" }
 );`} />
+          ),
+        }}
+      </FrameworkSwitcher>
 
       <h2 className="text-xl font-semibold mt-10 mb-3">How Fan-Out Works</h2>
       <div className="text-sm text-muted-foreground space-y-2">

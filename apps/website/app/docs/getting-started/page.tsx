@@ -1,4 +1,5 @@
 import { DocsCode, InlineCode } from "@/components/docs-code";
+import { FrameworkSwitcher } from "@/components/framework-switcher";
 import Link from "next/link";
 
 export const metadata = { title: "Getting Started — Pingback Docs" };
@@ -22,7 +23,10 @@ export default function GettingStartedPage() {
       </div>
 
       <h2 className="text-xl font-semibold mt-10 mb-3">Quick example</h2>
-      <DocsCode code={`import { cron } from "@pingback/next";
+      <FrameworkSwitcher>
+        {{
+          next: (
+            <DocsCode code={`import { cron } from "@pingback/next";
 
 export const dailyCleanup = cron(
   "daily-cleanup",
@@ -33,6 +37,9 @@ export const dailyCleanup = cron(
   },
   { retries: 3 }
 );`} />
+          ),
+        }}
+      </FrameworkSwitcher>
 
       <h2 className="text-xl font-semibold mt-10 mb-3">Choose your framework</h2>
       <p className="text-sm text-muted-foreground mb-4">
