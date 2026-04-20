@@ -1,8 +1,8 @@
 # Pingback
 
-Cron jobs and background tasks for modern web apps. Starting with Next.js.
+Reliable cron jobs and background tasks for modern web apps. Starting with Next.js.
 
-Pingback is a platform with framework-specific SDKs that let you define scheduled functions and background tasks directly in your codebase. Pingback handles scheduling, execution, retries, and provides a dashboard for monitoring.
+Pingback is a platform with framework-specific SDKs that let you define scheduled functions and background tasks directly in your codebase. Pingback handles scheduling, execution, retries, fan-out, and provides a dashboard for monitoring.
 
 ## Packages
 
@@ -10,8 +10,14 @@ Pingback is a platform with framework-specific SDKs that let you define schedule
 |---------|-------------|
 | [`@pingback/next`](packages/next) | Next.js SDK adapter |
 | [`@pingback/core`](packages/core) | Framework-agnostic core (used internally) |
-| [`@pingback/platform`](apps/platform) | API server, scheduler, and worker |
-| [`@pingback/shared-types`](shared/types) | Shared TypeScript types |
+
+## Apps
+
+| App | Description |
+|-----|-------------|
+| [`platform`](apps/platform) | NestJS API server, scheduler, and worker |
+| [`dashboard`](apps/dashboard) | Next.js web UI for monitoring |
+| [`website`](apps/website) | Landing page and documentation |
 
 ## Quick Start (Next.js)
 
@@ -43,7 +49,16 @@ export default withPingback({
 });
 ```
 
-### 4. Define a cron job
+### 4. Create the route handler
+
+```ts
+// app/api/__pingback/route.ts
+import { createRouteHandler } from "@pingback/next";
+
+export const { POST } = createRouteHandler();
+```
+
+### 5. Define a cron job
 
 ```ts
 // lib/pingback/review-emails.ts
@@ -54,35 +69,40 @@ export const sendReviewEmails = cron(
   "*/15 * * * *",
   async (ctx) => {
     const pending = await getPendingEmails();
-    ctx.log(`Processing ${pending.length} emails`);
+    for (const email of pending) {
+      await ctx.task("send-email", { id: email.id });
+    }
+    ctx.log(`Processed ${pending.length} emails`);
     return { processed: pending.length };
   },
   { retries: 3, timeout: "60s" }
 );
 ```
 
-### 5. Set environment variables
+### 6. Set environment variables
 
 ```
 PINGBACK_API_KEY=pb_live_...        # From your Pingback project settings
 PINGBACK_CRON_SECRET=...            # From your Pingback project settings
 ```
 
-### 6. Build & deploy
+### 7. Build & deploy
 
 ```bash
 next build
 ```
 
-That's it. Your cron functions are automatically discovered, registered with Pingback, and a route handler is generated at `/api/__pingback`.
+Your cron functions are automatically discovered, registered with Pingback, and a route handler is generated at `/api/__pingback`.
 
 ## How It Works
 
-1. **At build time:** `withPingback()` scans your codebase for `cron()` and `task()` calls, generates a route handler at `app/api/__pingback/route.ts`, and registers your functions with the Pingback platform.
+1. **At build time:** `withPingback()` scans your codebase for `cron()` and `task()` calls, generates a route handler, and registers your functions with the Pingback platform.
 
-2. **At runtime:** When a job is due, the Pingback scheduler enqueues it. The worker sends an HMAC-signed POST request to your app's `/api/__pingback` endpoint. The route handler verifies the signature, executes the function, and returns the result.
+2. **At runtime:** When a job is due, the scheduler enqueues it. The worker sends an HMAC-signed POST request to your app's `/api/__pingback` endpoint. The handler verifies the signature, executes the function, and returns the result with logs.
 
-3. **On the dashboard:** You can see execution history, logs, success/failure status, and configure alerts.
+3. **Fan-out:** Cron handlers can call `ctx.task()` to spawn independent child tasks. Each child runs with its own retries, timeout, and tracking.
+
+4. **On the dashboard:** See execution history, logs, success/failure status, child tasks, and configure email alerts.
 
 ## Architecture
 
@@ -110,15 +130,22 @@ npm install
 # Build all packages
 npm run build
 
-# Run tests
-npm test
-
-# Start the platform locally
+# Start the platform
 cd apps/platform
 cp .env.example .env  # Edit with your database credentials
-npm run start:dev
-# API at http://localhost:4000
-# Swagger docs at http://localhost:4000/docs
+npm run start:dev     # API at http://localhost:4000
+
+# Start the dashboard
+cd apps/dashboard
+npm run dev           # http://localhost:3000
+
+# Start the website
+cd apps/website
+npm run dev           # http://localhost:3100
+
+# Run the example app
+cd examples/nextjs
+npm run build && npm start  # http://localhost:3001
 ```
 
 ## Project Structure
@@ -126,13 +153,28 @@ npm run start:dev
 ```
 pingback/
 ├── apps/
-│   └── platform/          # NestJS API server + scheduler + worker
+│   ├── platform/          # NestJS API server + scheduler + worker
+│   ├── dashboard/         # Next.js dashboard for monitoring
+│   └── website/           # Landing page + documentation
 ├── packages/
 │   ├── core/              # Framework-agnostic SDK core
 │   └── next/              # Next.js adapter
-└── shared/
-    └── types/             # Shared TypeScript types
+├── shared/
+│   └── types/             # Shared TypeScript types
+└── examples/
+    └── nextjs/            # Example Next.js app using @pingback/next
 ```
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| Platform | NestJS, PostgreSQL, pgboss (queue), TypeORM |
+| Dashboard | Next.js 15, React 19, Tailwind CSS 4, React Query |
+| Website | Next.js 15, Tailwind CSS 4, Shiki |
+| SDK Core | TypeScript |
+| SDK Adapters | TypeScript (Next.js first, more coming) |
+| Auth | JWT + API Keys + GitHub OAuth |
 
 ## License
 
