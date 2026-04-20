@@ -114,7 +114,8 @@ export function DataTable<T>({
               {selectable && (
                 <th className="w-10 p-2 text-center">
                   <Checkbox
-                    checked={allSelected || (someSelected ? "mixed" : false)}
+                    checked={allSelected}
+                    indeterminate={someSelected && !allSelected}
                     onCheckedChange={() => {}}
                     onClick={toggleAll}
                   />
