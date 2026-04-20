@@ -1,4 +1,5 @@
 import { DocsCode, InlineCode } from "@/components/docs-code";
+import Link from "next/link";
 
 export const metadata = { title: "Getting Started — Pingback Docs" };
 
@@ -7,26 +8,20 @@ export default function GettingStartedPage() {
     <>
       <h1 className="text-3xl font-bold tracking-tight mb-2">Getting Started</h1>
       <p className="text-muted-foreground mb-8">
-        Get Pingback running in your Next.js app in under 10 minutes.
+        Pingback lets you define scheduled functions and background tasks directly
+        in your codebase. The platform handles scheduling, retries, fan-out, and monitoring.
       </p>
 
-      <h2 className="text-xl font-semibold mt-10 mb-3">1. Install the SDK</h2>
-      <DocsCode code="npm install @pingback/next" lang="bash" />
+      <h2 className="text-xl font-semibold mt-10 mb-3">How it works</h2>
+      <div className="text-sm text-muted-foreground space-y-2">
+        <p>1. Install a framework adapter (e.g. <InlineCode>@pingback/next</InlineCode>).</p>
+        <p>2. Define <InlineCode>cron()</InlineCode> and <InlineCode>task()</InlineCode> functions in your code.</p>
+        <p>3. Deploy — Pingback discovers your functions at build time and registers them.</p>
+        <p>4. The platform schedules and executes your functions, with retries and logging built in.</p>
+        <p>5. Monitor everything in the Pingback dashboard.</p>
+      </div>
 
-      <h2 className="text-xl font-semibold mt-10 mb-3">2. Configure</h2>
-      <p className="text-sm text-muted-foreground mb-2">
-        Create <InlineCode>pingback.config.ts</InlineCode> in your project root:
-      </p>
-      <DocsCode code={`import { defineConfig } from "@pingback/next";
-
-export default defineConfig({
-  apiKey: process.env.PINGBACK_API_KEY,
-});`} />
-
-      <h2 className="text-xl font-semibold mt-10 mb-3">3. Define your first cron</h2>
-      <p className="text-sm text-muted-foreground mb-2">
-        Create a file (e.g. <InlineCode>lib/pingback/cleanup.ts</InlineCode>) with a cron function:
-      </p>
+      <h2 className="text-xl font-semibold mt-10 mb-3">Quick example</h2>
       <DocsCode code={`import { cron } from "@pingback/next";
 
 export const dailyCleanup = cron(
@@ -35,41 +30,57 @@ export const dailyCleanup = cron(
   async (ctx) => {
     await removeExpiredSessions();
     ctx.log("Sessions cleaned up");
-  }
+  },
+  { retries: 3 }
 );`} />
 
-      <h2 className="text-xl font-semibold mt-10 mb-3">4. Set up the route handler</h2>
-      <p className="text-sm text-muted-foreground mb-2">
-        Create <InlineCode>app/api/__pingback/route.ts</InlineCode>:
+      <h2 className="text-xl font-semibold mt-10 mb-3">Choose your framework</h2>
+      <p className="text-sm text-muted-foreground mb-4">
+        Pingback provides framework-specific adapters built on a shared core.
+        Each adapter handles route generation, build plugins, and framework conventions.
       </p>
-      <DocsCode code={`import { createRouteHandler } from "@pingback/next";
+      <div className="rounded-lg border overflow-hidden my-4">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-muted/30">
+              <th className="text-left p-3 font-medium">Framework</th>
+              <th className="text-left p-3 font-medium">Package</th>
+              <th className="text-left p-3 font-medium">Status</th>
+            </tr>
+          </thead>
+          <tbody className="text-muted-foreground">
+            <tr className="border-b">
+              <td className="p-3"><Link href="/docs/next" className="text-accent hover:underline">Next.js</Link></td>
+              <td className="p-3 font-mono">@pingback/next</td>
+              <td className="p-3">Available</td>
+            </tr>
+            <tr className="border-b">
+              <td className="p-3">Nuxt</td>
+              <td className="p-3 font-mono">@pingback/nuxt</td>
+              <td className="p-3">Coming soon</td>
+            </tr>
+            <tr className="border-b">
+              <td className="p-3">SvelteKit</td>
+              <td className="p-3 font-mono">@pingback/sveltekit</td>
+              <td className="p-3">Coming soon</td>
+            </tr>
+            <tr>
+              <td className="p-3">Remix</td>
+              <td className="p-3 font-mono">@pingback/remix</td>
+              <td className="p-3">Coming soon</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-export const { POST } = createRouteHandler();`} />
-
-      <h2 className="text-xl font-semibold mt-10 mb-3">5. Add the Next.js plugin</h2>
+      <h2 className="text-xl font-semibold mt-10 mb-3">Environment variables</h2>
       <p className="text-sm text-muted-foreground mb-2">
-        Update your <InlineCode>next.config.ts</InlineCode>:
-      </p>
-      <DocsCode code={`import { withPingback } from "@pingback/next";
-
-export default withPingback({
-  // your existing Next.js config
-});`} />
-
-      <h2 className="text-xl font-semibold mt-10 mb-3">6. Set environment variables</h2>
-      <p className="text-sm text-muted-foreground mb-2">
-        Add these to your <InlineCode>.env.local</InlineCode>:
+        All adapters require these environment variables:
       </p>
       <DocsCode code={`PINGBACK_API_KEY=pb_live_your_api_key_here
 PINGBACK_CRON_SECRET=your_cron_secret_here`} lang="bash" />
       <p className="text-sm text-muted-foreground mt-2">
         You can find both values in the Pingback dashboard under your project settings.
-      </p>
-
-      <h2 className="text-xl font-semibold mt-10 mb-3">7. Deploy</h2>
-      <p className="text-sm text-muted-foreground">
-        Deploy your app. Pingback discovers your functions at build time, registers them
-        with the platform, and starts scheduling. You can monitor executions in the dashboard.
       </p>
     </>
   );
