@@ -146,4 +146,7 @@
   html {
     @apply font-sans;
   }
+  button, [role="button"], [type="button"], [type="submit"], a[href] {
+    cursor: pointer;
+  }
 }

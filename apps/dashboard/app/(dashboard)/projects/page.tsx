@@ -13,7 +13,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="w-full text-left rounded-md border hover:bg-secondary/50 transition-colors"
+      className="w-full text-left rounded-md border hover:bg-secondary/50 transition-colors cursor-pointer"
       style={{ backgroundColor: "var(--muted)" }}
     >
       <div className="p-4 flex items-start justify-between">

@@ -23,7 +23,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const tokens = await registerWithCredentials(email, password, name || undefined);
+      const tokens = await registerWithCredentials(email, password, name);
       setTokens(tokens.accessToken, tokens.refreshToken);
       router.push("/projects");
     } catch (err) {
@@ -42,7 +42,7 @@ export default function RegisterPage() {
         <p className="text-sm text-muted-foreground">Create your account</p>
       </div>
 
-      <div className="rounded-lg border p-6" style={{ backgroundColor: "#1a1a17" }}>
+      <div className="p-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="rounded-md px-3 py-2 text-sm" style={{ backgroundColor: "rgba(212, 115, 74, 0.1)", color: "#d4734a" }}>
@@ -50,8 +50,8 @@ export default function RegisterPage() {
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="name">Name (optional)</Label>
-            <Input id="name" type="text" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Label htmlFor="name">Name</Label>
+            <Input id="name" type="text" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>

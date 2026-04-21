@@ -17,7 +17,7 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
-      className="text-muted-foreground hover:text-foreground transition-colors p-0.5 inline-flex items-center gap-1"
+      className="text-muted-foreground hover:text-foreground transition-colors p-0.5 inline-flex items-center gap-1 cursor-pointer"
       onClick={() => {
         navigator.clipboard.writeText(text);
         setCopied(true);

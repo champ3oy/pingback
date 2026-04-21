@@ -41,7 +41,7 @@ export default function LoginPage() {
         <p className="text-sm text-muted-foreground">Sign in to your account</p>
       </div>
 
-      <div className="rounded-lg border p-6" style={{ backgroundColor: "#1a1a17" }}>
+      <div className="p-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="rounded-md px-3 py-2 text-sm" style={{ backgroundColor: "rgba(212, 115, 74, 0.1)", color: "#d4734a" }}>
