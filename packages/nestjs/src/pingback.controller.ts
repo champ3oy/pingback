@@ -46,7 +46,7 @@ function verifySignature(
   }
 }
 
-@Controller()
+@Controller('api/pingback')
 export class PingbackController {
   constructor(
     @Inject(PINGBACK_OPTIONS) private options: PingbackModuleOptions,
