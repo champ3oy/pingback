@@ -12,6 +12,7 @@ import {
   IconSettingsFilled,
   IconPlayerTrackNextFilled,
   IconLayoutListFilled,
+  IconUserFilled,
 } from "@tabler/icons-react";
 import { ProjectSwitcher } from "./project-switcher";
 import { UserMenu } from "./user-menu";
@@ -30,7 +31,8 @@ const projectNav = [
 ];
 
 const accountNav = [
-  { name: "Projects", href: "/projects", icon: IconFolderFilled },
+  { name: "Projects", href: "/projects", icon: IconFolderFilled, color: "#d4a574" },
+  { name: "Account", href: "/account", icon: IconUserFilled, color: "#8a8a80" },
 ];
 
 function NavItem({

@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   Body,
   UseGuards,
   Req,
@@ -15,6 +16,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthTokensResponse } from './dto/auth-response.dto';
 
@@ -49,6 +51,24 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   refresh(@Body() dto: RefreshDto) {
     return this.authService.refreshTokens(dto.refreshToken);
+  }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @ApiOperation({ summary: 'Get current user profile' })
+  async getProfile(@Req() req: Request) {
+    const user = req.user as { id: string };
+    return this.authService.getProfile(user.id);
+  }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  @ApiOperation({ summary: 'Update current user profile' })
+  async updateProfile(@Req() req: Request, @Body() dto: UpdateProfileDto) {
+    const user = req.user as { id: string };
+    return this.authService.updateProfile(user.id, dto);
   }
 
   @UseGuards(AuthGuard('github'))

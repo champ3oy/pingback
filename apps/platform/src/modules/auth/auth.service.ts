@@ -2,6 +2,8 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../../entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -75,6 +78,57 @@ export class AuthService {
     }
 
     return this.generateTokens(user);
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+      createdAt: user.createdAt,
+    };
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (dto.newPassword) {
+      if (!dto.currentPassword) {
+        throw new BadRequestException('Current password is required to set a new password');
+      }
+      if (!user.passwordHash) {
+        throw new BadRequestException('Cannot change password for OAuth-only accounts');
+      }
+      const valid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+      if (!valid) {
+        throw new UnauthorizedException('Current password is incorrect');
+      }
+      user.passwordHash = await bcrypt.hash(dto.newPassword, 10);
+    }
+
+    if (dto.email && dto.email !== user.email) {
+      const existing = await this.userRepo.findOne({ where: { email: dto.email } });
+      if (existing) throw new ConflictException('Email already in use');
+      user.email = dto.email;
+    }
+
+    if (dto.name !== undefined) {
+      user.name = dto.name;
+    }
+
+    await this.userRepo.save(user);
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+      createdAt: user.createdAt,
+    };
   }
 
   async findOrCreateGithubUser(profile: {
