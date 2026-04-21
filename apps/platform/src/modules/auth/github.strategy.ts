@@ -13,7 +13,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     super({
       clientID: config.get<string>('github.clientId'),
       clientSecret: config.get<string>('github.clientSecret'),
-      callbackURL: '/auth/github/callback',
+      callbackURL: config.get<string>('PLATFORM_URL', 'https://api.pingback.lol') + '/auth/github/callback',
       scope: ['user:email'],
     });
   }
@@ -24,7 +24,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     profile: any,
   ) {
     const email =
-      profile.emails?.[0]?.value || `${profile.id}@github.pingback.dev`;
+      profile.emails?.[0]?.value || `${profile.id}@github.pingback.lol`;
     return this.authService.findOrCreateGithubUser({
       githubId: String(profile.id),
       email,

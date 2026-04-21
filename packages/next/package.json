@@ -1,6 +1,6 @@
 {
-  "name": "@pingback/next",
-  "version": "0.1.0",
+  "name": "@usepingback/next",
+  "version": "0.1.1",
   "description": "Next.js SDK for Pingback — reliable cron jobs and background tasks",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -43,12 +43,12 @@
     "url": "https://github.com/champ3oy/pingback",
     "directory": "packages/next"
   },
-  "homepage": "https://pingback.dev/docs/next",
+  "homepage": "https://pingback.lol/docs/next",
   "bugs": {
     "url": "https://github.com/champ3oy/pingback/issues"
   },
   "dependencies": {
-    "@pingback/core": "0.1.0",
+    "@usepingback/core": "0.1.1",
     "glob": "^11.0.0"
   },
   "peerDependencies": {

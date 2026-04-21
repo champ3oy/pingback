@@ -4,29 +4,33 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import {
   IconClockFilled,
-  IconListCheck,
   IconPlayerPlayFilled,
-  IconTerminal2,
+  IconDeviceHeartMonitorFilled,
   IconKeyFilled,
   IconBellFilled,
   IconFolderFilled,
   IconSettingsFilled,
+  IconPlayerTrackNextFilled,
+  IconLayoutListFilled,
+  IconTerminal,
 } from "@tabler/icons-react";
 import { ProjectSwitcher } from "./project-switcher";
 import { UserMenu } from "./user-menu";
 import { cn } from "@/lib/utils";
 
 const projectNav = [
-  { name: "Runs", href: "runs", icon: IconPlayerPlayFilled },
+  { name: "Runs", href: "runs", icon: IconPlayerTrackNextFilled },
   { name: "Crons", href: "crons", icon: IconClockFilled },
-  { name: "Tasks", href: "tasks", icon: IconListCheck },
-  { name: "Logs", href: "logs", icon: IconTerminal2 },
+  { name: "Tasks", href: "tasks", icon: IconLayoutListFilled },
+  { name: "Logs", href: "logs", icon: IconDeviceHeartMonitorFilled },
   { name: "API Keys", href: "api-keys", icon: IconKeyFilled },
   { name: "Alerts", href: "alerts", icon: IconBellFilled },
   { name: "Settings", href: "settings", icon: IconSettingsFilled },
 ];
 
-const accountNav = [{ name: "Projects", href: "/projects", icon: IconFolderFilled }];
+const accountNav = [
+  { name: "Projects", href: "/projects", icon: IconFolderFilled },
+];
 
 export function Sidebar() {
   const params = useParams();
@@ -43,7 +47,7 @@ export function Sidebar() {
 
       <nav className="flex-1 overflow-y-auto px-2 py-3">
         {projectId && (
-          <div className="mb-4">
+          <div className="mb-6">
             <p className="px-3 mb-1 text-[11px] font-semibold text-muted-foreground">
               Project
             </p>
@@ -61,7 +65,9 @@ export function Sidebar() {
                       : "text-muted-foreground hover:text-foreground hover:bg-secondary",
                   )}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon
+                    className={`h-4 w-4 ${isActive ? "text-amber-400" : ""}`}
+                  />
                   {item.name}
                 </Link>
               );
@@ -86,7 +92,9 @@ export function Sidebar() {
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary",
                 )}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon
+                  className={`h-4 w-4 ${isActive ? "text-amber-400" : ""}`}
+                />
                 {item.name}
               </Link>
             );
@@ -94,7 +102,7 @@ export function Sidebar() {
         </div>
       </nav>
 
-      <div className="border-t p-3">
+      <div className="border-t p-3 py-1">
         <UserMenu />
       </div>
     </aside>

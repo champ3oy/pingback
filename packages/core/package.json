@@ -1,6 +1,6 @@
 {
-  "name": "@pingback/core",
-  "version": "0.1.0",
+  "name": "@usepingback/core",
+  "version": "0.1.1",
   "description": "Framework-agnostic core for Pingback SDKs — function registry, context, signing, and registration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,7 +28,7 @@
     "url": "https://github.com/champ3oy/pingback",
     "directory": "packages/core"
   },
-  "homepage": "https://pingback.dev",
+  "homepage": "https://pingback.lol",
   "bugs": {
     "url": "https://github.com/champ3oy/pingback/issues"
   },
