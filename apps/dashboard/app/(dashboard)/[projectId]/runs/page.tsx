@@ -284,6 +284,7 @@ function RunDetail({ exec, projectId }: { exec: Execution; projectId: string }) 
             <span className="font-medium" style={{ color: "#d4a574" }}>
               {exec.parent?.job?.name || exec.parentId.slice(0, 8) + "..."}
             </span>
+            <span className="font-mono ml-1">({exec.parentId.slice(0, 8)}...)</span>
           </span>
         </div>
       )}
@@ -404,6 +405,18 @@ export default function RunsPage() {
       render: (exec) => (
         <span className="font-medium">
           {exec.job?.name || exec.jobId.slice(0, 8)}
+        </span>
+      ),
+    },
+    {
+      key: "type",
+      header: "Type",
+      render: (exec) => (
+        <span
+          className="text-xs font-mono px-1.5 py-0.5 rounded"
+          style={{ backgroundColor: "var(--muted)", color: "var(--muted-foreground)" }}
+        >
+          {exec.job?.type || (exec.parentId ? "task" : "cron")}
         </span>
       ),
     },

@@ -54,6 +54,7 @@ export class RegistrationService {
       const jobData: Partial<Job> = {
         projectId,
         name: fn.name,
+        type: fn.type,
         schedule: (fn.type === 'cron' ? fn.schedule : null) as string,
         source: 'sdk' as const,
         status: 'active' as const,

@@ -29,7 +29,7 @@ export interface Execution {
     logs: Array<{ timestamp: number; level?: string; message: string; meta?: Record<string, any> }>;
   }>;
   createdAt: string;
-  job?: { name: string; retries: number };
+  job?: { name: string; retries: number; type: "cron" | "task" };
   parent?: { id: string; job?: { name: string } } | null;
 }
 

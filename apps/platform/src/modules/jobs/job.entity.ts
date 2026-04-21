@@ -24,6 +24,9 @@ export class Job {
   @Column({ type: 'text', nullable: true })
   schedule: string;
 
+  @Column({ type: 'enum', enum: ['cron', 'task'], default: 'cron' })
+  type: 'cron' | 'task';
+
   @Column({ type: 'enum', enum: ['active', 'paused', 'inactive'], default: 'active' })
   status: 'active' | 'paused' | 'inactive';
 
