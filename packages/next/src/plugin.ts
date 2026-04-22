@@ -26,32 +26,26 @@ export async function discoverFunctionFiles(
 // Keep for backward compatibility / tests
 export { generateRouteFile } from './generate';
 
+// Module-level singleton so re-evaluations of next.config don't re-register
+let registrationPromise: Promise<void> | null = null;
+
 export function withPingback(nextConfig: any = {}): any {
-  const originalWebpack = nextConfig.webpack;
-  let registrationPromise: Promise<void> | null = null;
+  if (process.env.NODE_ENV === 'production' && !registrationPromise) {
+    registrationPromise = runRegistration(process.cwd()).catch((err: Error) => {
+      console.error(`[pingback] Registration failed: ${err.message}`);
+    });
+  }
+
+  const originalHeaders = nextConfig.headers;
 
   return {
     ...nextConfig,
-    webpack(config: any, context: any) {
-      // Only register with platform during production server builds
-      if (context.isServer && !context.dev && !registrationPromise) {
-        registrationPromise = runRegistration(context.dir).catch((err: Error) => {
-          console.error(`[pingback] Registration failed: ${err.message}`);
-        });
-
-        config.plugins.push({
-          apply(compiler: any) {
-            compiler.hooks.afterEmit.tapPromise('PingbackRegistration', async () => {
-              if (registrationPromise) await registrationPromise;
-            });
-          },
-        });
+    // Use headers() as a bundler-agnostic build hook to await registration
+    async headers() {
+      if (registrationPromise) {
+        await registrationPromise;
       }
-
-      if (originalWebpack) {
-        return originalWebpack(config, context);
-      }
-      return config;
+      return originalHeaders ? originalHeaders() : [];
     },
   };
 }
