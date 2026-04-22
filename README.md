@@ -13,6 +13,7 @@ Pingback is a platform with framework-specific SDKs that let you define schedule
 | Package | Description |
 |---------|-------------|
 | [`@usepingback/next`](packages/next) | Next.js SDK adapter |
+| [`@usepingback/nestjs`](packages/nestjs) | NestJS SDK adapter |
 | [`@usepingback/core`](packages/core) | Framework-agnostic core (used internally) |
 
 ## Apps
@@ -121,7 +122,9 @@ This lets you test cron jobs and background tasks locally without deploying.
 
 3. **Fan-out:** Cron handlers can call `ctx.task()` to spawn independent child tasks. Each child runs with its own retries, timeout, and tracking.
 
-4. **On the dashboard:** See execution history, logs, success/failure status, child tasks, and configure email alerts.
+4. **Programmatic triggering:** Use `PingbackClient` to trigger any registered task from your application code — no schedule needed. Useful for event-driven workflows like sending emails after signup or processing webhooks.
+
+5. **On the dashboard:** See execution history, logs, success/failure status, child tasks, and configure email alerts.
 
 ## Architecture
 
@@ -177,11 +180,13 @@ pingback/
 │   └── website/           # Landing page + documentation
 ├── packages/
 │   ├── core/              # Framework-agnostic SDK core
-│   └── next/              # Next.js adapter
+│   ├── next/              # Next.js adapter
+│   └── nestjs/            # NestJS adapter
 ├── shared/
 │   └── types/             # Shared TypeScript types
 └── examples/
-    └── nextjs/            # Example Next.js app using @usepingback/next
+    ├── nextjs/            # Example Next.js app using @usepingback/next
+    └── nestjs/            # Example NestJS app using @usepingback/nestjs
 ```
 
 ## Tech Stack

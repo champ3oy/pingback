@@ -128,6 +128,25 @@ export const sendEmail = task("send-email", async (ctx, { id }) => {
 
 Each task runs independently with its own retries and timeout. Retries happen within the same execution.
 
+## Programmatic Triggering
+
+Use `PingbackClient` to trigger tasks from your application code — no cron schedule or fan-out needed:
+
+```ts
+import { PingbackClient } from "@usepingback/next";
+
+const pingback = new PingbackClient({
+  apiKey: process.env.PINGBACK_API_KEY!,
+});
+
+// e.g. after a user signs up
+const { executionId } = await pingback.trigger("send-onboarding-email", {
+  userId: user.id,
+});
+```
+
+`trigger()` returns an `{ executionId }` you can use for tracking. The task must already be registered in your project (defined with `task()` and deployed).
+
 ## Route Handler
 
 The route handler is imported from `@usepingback/next/handler`:

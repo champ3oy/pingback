@@ -54,6 +54,33 @@ PINGBACK_API_KEY=pb_live_...
 PINGBACK_CRON_SECRET=...
 ```
 
+## Programmatic Triggering
+
+Use `PingbackClient` to trigger tasks from anywhere in your application — no cron schedule or fan-out needed. It's an injectable service:
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { PingbackClient } from '@usepingback/nestjs';
+
+@Injectable()
+export class AuthService {
+  constructor(private readonly pingback: PingbackClient) {}
+
+  async register(email: string, password: string) {
+    const user = await this.createUser(email, password);
+
+    const { executionId } = await this.pingback.trigger(
+      'send-onboarding-email',
+      { userId: user.id },
+    );
+
+    return user;
+  }
+}
+```
+
+`trigger()` returns an `{ executionId }` you can use for tracking. The task must already be registered in your project (defined with `@Task()` and deployed).
+
 ## Structured Logging
 
 ```typescript
