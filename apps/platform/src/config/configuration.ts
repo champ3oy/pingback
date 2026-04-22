@@ -17,4 +17,10 @@ export default () => ({
     apiKey: process.env.RESEND_API_KEY,
   },
   dashboardUrl: process.env.DASHBOARD_URL || 'http://localhost:3000',
+  pingback: {
+    apiKey: process.env.PINGBACK_API_KEY,
+    cronSecret: process.env.PINGBACK_CRON_SECRET,
+    baseUrl: process.env.PINGBACK_BASE_URL,
+    platformUrl: process.env.PINGBACK_PLATFORM_URL || 'https://api.pingback.lol',
+  },
 });

@@ -13,12 +13,14 @@ import { User } from '../../entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { PingbackClient } from '@usepingback/nestjs';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private userRepo: Repository<User>,
     private jwtService: JwtService,
+    private pingback: PingbackClient,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -36,6 +38,10 @@ export class AuthService {
       name: dto.name,
     });
     await this.userRepo.save(user);
+
+    this.pingback
+      .trigger('send-onboarding-email', { email: user.email, name: user.name })
+      .catch(() => {});
 
     return this.generateTokens(user);
   }
@@ -148,7 +154,13 @@ export class AuthService {
       name: profile.name,
       avatarUrl: profile.avatarUrl,
     });
-    return this.userRepo.save(user);
+    const saved = await this.userRepo.save(user);
+
+    this.pingback
+      .trigger('send-onboarding-email', { email: saved.email, name: saved.name })
+      .catch(() => {});
+
+    return saved;
   }
 
   async loginGithubUser(user: User) {

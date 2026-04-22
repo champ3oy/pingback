@@ -1,4 +1,5 @@
 export { PingbackModule } from './pingback.module';
+export { PingbackClient } from './pingback.client';
 export { Cron, Task } from './decorators';
 export type { PingbackFunctionMetadata } from './decorators';
 export { PINGBACK_OPTIONS, PINGBACK_REGISTRY } from './pingback.controller';

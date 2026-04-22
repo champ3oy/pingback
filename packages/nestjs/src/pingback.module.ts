@@ -13,6 +13,7 @@ import {
   PINGBACK_OPTIONS,
   PINGBACK_REGISTRY,
 } from './pingback.controller';
+import { PingbackClient } from './pingback.client';
 
 @Module({})
 export class PingbackModule implements OnModuleInit {
@@ -41,8 +42,9 @@ export class PingbackModule implements OnModuleInit {
       providers: [
         { provide: PINGBACK_OPTIONS, useValue: options },
         { provide: PINGBACK_REGISTRY, useValue: registry },
+        PingbackClient,
       ],
-      exports: [PINGBACK_OPTIONS, PINGBACK_REGISTRY],
+      exports: [PINGBACK_OPTIONS, PINGBACK_REGISTRY, PingbackClient],
       global: true,
     };
   }
