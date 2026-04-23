@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IconCheck, IconCopy, IconExternalLink } from "@tabler/icons-react";
 import { useProject, useDeleteProject } from "@/lib/hooks/use-projects";
+import { useSubscription, useCheckout, usePortal } from "@/lib/hooks/use-subscription";
 import { apiClient } from "@/lib/api";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
@@ -30,6 +31,29 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
   );
 }
 
+function UsageBar({ label, used, limit }: { label: string; used: number; limit: number | null }) {
+  const isUnlimited = limit === null || limit === Infinity;
+  const percentage = isUnlimited ? 0 : Math.min((used / limit) * 100, 100);
+  const color =
+    percentage >= 100 ? "bg-red-500" : percentage >= 80 ? "bg-amber-500" : "bg-emerald-500";
+  const limitDisplay = isUnlimited ? "Unlimited" : limit.toLocaleString();
+
+  return (
+    <div>
+      <div className="flex justify-between text-xs text-muted-foreground mb-1">
+        <span>{label}</span>
+        <span>{used.toLocaleString()} / {limitDisplay}</span>
+      </div>
+      <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--muted)" }}>
+        <div
+          className={`h-full rounded-full transition-all ${color}`}
+          style={{ width: `${isUnlimited ? 0 : percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function ProjectSettingsPage() {
   const params = useParams();
   const router = useRouter();
@@ -37,6 +61,9 @@ export default function ProjectSettingsPage() {
   const { data: project, refetch } = useProject(projectId);
   const deleteProject = useDeleteProject();
   const [saving, setSaving] = useState(false);
+  const { data: usage } = useSubscription();
+  const checkout = useCheckout();
+  const portal = usePortal();
 
   const [name, setName] = useState("");
   const [endpointUrl, setEndpointUrl] = useState("");
@@ -115,6 +142,45 @@ export default function ProjectSettingsPage() {
             <div className="p-4" style={{ backgroundColor: "var(--background)" }}>
               <p className="text-[10px] text-muted-foreground mb-1">Created</p>
               <p className="text-xs">{new Date(project.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Plan & Billing */}
+        <div className="rounded-md border mb-6">
+          <div className="px-4 py-3 border-b flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Plan & Billing</span>
+            <span className="text-xs font-medium capitalize">{usage?.plan || "free"} plan</span>
+          </div>
+          <div className="p-4 space-y-4">
+            {usage && (
+              <div className="space-y-3">
+                <UsageBar label="Projects" used={usage.projects.used} limit={usage.projects.limit} />
+                <UsageBar label="Jobs" used={usage.jobs.used} limit={usage.jobs.limit} />
+                <UsageBar label="Executions this month" used={usage.executions.used} limit={usage.executions.limit} />
+              </div>
+            )}
+            <div className="flex gap-2 pt-2">
+              {(!usage || usage.plan !== "team") && (
+                <Button
+                  size="sm"
+                  onClick={() => checkout.mutate((!usage || usage.plan === "free") ? "pro" : "team")}
+                  disabled={checkout.isPending}
+                  style={{ backgroundColor: "#d4a574", color: "#000", borderColor: "#d4a574" }}
+                >
+                  {checkout.isPending ? "Redirecting..." : `Upgrade to ${(!usage || usage.plan === "free") ? "Pro" : "Team"}`}
+                </Button>
+              )}
+              {usage && usage.plan !== "free" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => portal.mutate()}
+                  disabled={portal.isPending}
+                >
+                  {portal.isPending ? "Redirecting..." : "Manage Billing"}
+                </Button>
+              )}
             </div>
           </div>
         </div>
