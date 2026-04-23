@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
 import { Alert } from './alert.entity';
@@ -7,6 +7,9 @@ import { Job } from '../jobs/job.entity';
 import { EmailNotifier } from './notifiers/email.notifier';
 import { CreateAlertDto } from './dto/create-alert.dto';
 import { UpdateAlertDto } from './dto/update-alert.dto';
+import { PlanLimitsService } from '../subscription/plan-limits.service';
+import { User } from '../../entities/user.entity';
+import { Project } from '../projects/project.entity';
 
 @Injectable()
 export class AlertsService {
@@ -16,7 +19,10 @@ export class AlertsService {
     @InjectRepository(Alert) private alertRepo: Repository<Alert>,
     @InjectRepository(Execution) private execRepo: Repository<Execution>,
     @InjectRepository(Job) private jobRepo: Repository<Job>,
+    @InjectRepository(Project) private projectRepo: Repository<Project>,
+    @InjectRepository(User) private userRepo: Repository<User>,
     private emailNotifier: EmailNotifier,
+    private planLimitsService: PlanLimitsService,
   ) {}
 
   async evaluate(jobId: string, executionId: string) {
@@ -141,6 +147,18 @@ export class AlertsService {
   }
 
   async create(projectId: string, dto: CreateAlertDto) {
+    // Check alert channel against plan
+    const project = await this.projectRepo.findOne({ where: { id: projectId } });
+    if (project) {
+      const user = await this.userRepo.findOne({ where: { id: project.userId } });
+      if (user) {
+        const check = this.planLimitsService.checkAlertChannel(user, dto.channel);
+        if (!check.allowed) {
+          throw new ForbiddenException(check.message);
+        }
+      }
+    }
+
     const alert = this.alertRepo.create({
       projectId,
       jobId: dto.jobId || undefined,
