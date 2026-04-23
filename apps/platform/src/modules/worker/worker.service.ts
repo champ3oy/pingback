@@ -1,9 +1,14 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { createHmac } from 'crypto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ExecutionsService } from '../executions/executions.service';
 import { QueueService } from '../queue/queue.service';
 import { AlertsService } from '../alerts/alerts.service';
 import { JobsService } from '../jobs/jobs.service';
+import { PlanLimitsService } from '../subscription/plan-limits.service';
+import { User } from '../../entities/user.entity';
+import { Project } from '../projects/project.entity';
 
 interface QueueMessage {
   executionId: string;
@@ -28,6 +33,9 @@ export class WorkerService implements OnModuleInit {
     private queueService: QueueService,
     private alertsService: AlertsService,
     private jobsService: JobsService,
+    private planLimitsService: PlanLimitsService,
+    @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Project) private projectRepo: Repository<Project>,
   ) {}
 
   onModuleInit() {
@@ -45,6 +53,40 @@ export class WorkerService implements OnModuleInit {
 
     try {
       await this.executionsService.markRunning(msg.executionId);
+
+      // Load project owner for plan checks
+      const project = await this.projectRepo.findOne({ where: { id: msg.projectId } });
+      let user: User | null = null;
+      if (project) {
+        user = await this.userRepo.findOne({ where: { id: project.userId } });
+      }
+
+      if (user) {
+        // Lazy reset of monthly counter
+        if (user.executionsResetAt && new Date() > user.executionsResetAt) {
+          user.executionsThisMonth = 0;
+          user.executionsResetAt = new Date(
+            new Date().getFullYear(),
+            new Date().getMonth() + 1,
+            1,
+          );
+          await this.userRepo.save(user);
+        }
+
+        // Check execution limit
+        const execCheck = this.planLimitsService.canExecute(user);
+        if (!execCheck.allowed) {
+          await this.executionsService.markCompleted(msg.executionId, {
+            status: 'failed',
+            errorMessage: execCheck.message || 'Monthly execution limit reached',
+          });
+          return;
+        }
+
+        // Increment execution counter
+        user.executionsThisMonth += 1;
+        await this.userRepo.save(user);
+      }
 
       const timestamp = Math.floor(Date.now() / 1000).toString();
       const body = JSON.stringify({
@@ -97,7 +139,16 @@ export class WorkerService implements OnModuleInit {
           });
 
           // Fan-out: dispatch child tasks
-          for (const task of tasks) {
+          let tasksToDispatch = tasks;
+          if (user) {
+            tasksToDispatch = this.planLimitsService.capFanOut(user, tasks);
+            if (tasksToDispatch.length < tasks.length) {
+              this.logger.warn(
+                `Fan-out capped: ${tasks.length} tasks requested, ${tasksToDispatch.length} allowed for ${user.plan} plan`,
+              );
+            }
+          }
+          for (const task of tasksToDispatch) {
             try {
               const taskJob = await this.jobsService.findByName(
                 msg.projectId,
