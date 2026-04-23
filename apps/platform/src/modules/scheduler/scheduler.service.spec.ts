@@ -4,6 +4,7 @@ import { SchedulerService } from './scheduler.service';
 import { Job } from '../jobs/job.entity';
 import { ExecutionsService } from '../executions/executions.service';
 import { QueueService } from '../queue/queue.service';
+import { AlertsService } from '../alerts/alerts.service';
 
 describe('SchedulerService', () => {
   let service: SchedulerService;
@@ -24,12 +25,15 @@ describe('SchedulerService', () => {
       send: jest.fn(),
     };
 
+    const alertsService = { evaluate: jest.fn() };
+
     const module = await Test.createTestingModule({
       providers: [
         SchedulerService,
         { provide: getRepositoryToken(Job), useValue: jobRepo },
         { provide: ExecutionsService, useValue: executionsService },
         { provide: QueueService, useValue: queueService },
+        { provide: AlertsService, useValue: alertsService },
       ],
     }).compile();
 

@@ -1,8 +1,13 @@
 import { Test } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { WorkerService } from './worker.service';
 import { ExecutionsService } from '../executions/executions.service';
 import { QueueService } from '../queue/queue.service';
 import { AlertsService } from '../alerts/alerts.service';
+import { JobsService } from '../jobs/jobs.service';
+import { PlanLimitsService } from '../subscription/plan-limits.service';
+import { User } from '../../entities/user.entity';
+import { Project } from '../projects/project.entity';
 
 // Mock global fetch
 const mockFetch = jest.fn();
@@ -18,6 +23,7 @@ describe('WorkerService', () => {
     executionsService = {
       markRunning: jest.fn(),
       markCompleted: jest.fn(),
+      saveAttemptAndRetry: jest.fn(),
     };
     queueService = {
       work: jest.fn(),
@@ -27,12 +33,21 @@ describe('WorkerService', () => {
       evaluate: jest.fn(),
     };
 
+    const jobsService = { findOne: jest.fn() };
+    const planLimitsService = { capRetries: jest.fn((_, r) => r) };
+    const userRepo = { findOne: jest.fn() };
+    const projectRepo = { findOne: jest.fn() };
+
     const module = await Test.createTestingModule({
       providers: [
         WorkerService,
         { provide: ExecutionsService, useValue: executionsService },
         { provide: QueueService, useValue: queueService },
         { provide: AlertsService, useValue: alertsService },
+        { provide: JobsService, useValue: jobsService },
+        { provide: PlanLimitsService, useValue: planLimitsService },
+        { provide: getRepositoryToken(User), useValue: userRepo },
+        { provide: getRepositoryToken(Project), useValue: projectRepo },
       ],
     }).compile();
 
@@ -85,7 +100,7 @@ describe('WorkerService', () => {
 
       await service.processJob({ data: baseMessage } as any);
 
-      expect(executionsService.markCompleted).toHaveBeenCalledWith(
+      expect(executionsService.saveAttemptAndRetry).toHaveBeenCalledWith(
         'exec-1',
         expect.objectContaining({ status: 'failed', httpStatus: 500 }),
       );
@@ -94,7 +109,7 @@ describe('WorkerService', () => {
         expect.objectContaining({ attempt: 2 }),
         expect.objectContaining({ startAfter: expect.any(Number) }),
       );
-      expect(alertsService.evaluate).toHaveBeenCalled();
+      expect(alertsService.evaluate).not.toHaveBeenCalled();
     });
 
     it('should not retry when max retries reached', async () => {
@@ -104,7 +119,7 @@ describe('WorkerService', () => {
         text: () => Promise.resolve('Error'),
       });
 
-      const maxedMessage = { ...baseMessage, attempt: 3, maxRetries: 3 };
+      const maxedMessage = { ...baseMessage, attempt: 4, maxRetries: 3 };
       await service.processJob({ data: maxedMessage } as any);
 
       expect(queueService.send).not.toHaveBeenCalled();
@@ -116,7 +131,7 @@ describe('WorkerService', () => {
 
       await service.processJob({ data: baseMessage } as any);
 
-      expect(executionsService.markCompleted).toHaveBeenCalledWith(
+      expect(executionsService.saveAttemptAndRetry).toHaveBeenCalledWith(
         'exec-1',
         expect.objectContaining({
           status: 'failed',

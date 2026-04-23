@@ -3,6 +3,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { Job } from './job.entity';
+import { User } from '../../entities/user.entity';
+import { PlanLimitsService } from '../subscription/plan-limits.service';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -18,10 +20,15 @@ describe('JobsService', () => {
       createQueryBuilder: jest.fn(),
     };
 
+    const userRepo = { findOne: jest.fn() };
+    const planLimitsService = { canCreateJob: jest.fn().mockResolvedValue({ allowed: true }), capRetries: jest.fn((_, r) => r) };
+
     const module = await Test.createTestingModule({
       providers: [
         JobsService,
         { provide: getRepositoryToken(Job), useValue: jobRepo },
+        { provide: getRepositoryToken(User), useValue: userRepo },
+        { provide: PlanLimitsService, useValue: planLimitsService },
       ],
     }).compile();
 

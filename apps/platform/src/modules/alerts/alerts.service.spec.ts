@@ -5,6 +5,9 @@ import { Alert } from './alert.entity';
 import { Execution } from '../executions/execution.entity';
 import { Job } from '../jobs/job.entity';
 import { EmailNotifier } from './notifiers/email.notifier';
+import { User } from '../../entities/user.entity';
+import { Project } from '../projects/project.entity';
+import { PlanLimitsService } from '../subscription/plan-limits.service';
 
 describe('AlertsService', () => {
   let service: AlertsService;
@@ -32,13 +35,20 @@ describe('AlertsService', () => {
       send: jest.fn(),
     };
 
+    const projectRepo = { findOne: jest.fn() };
+    const userRepo = { findOne: jest.fn() };
+    const planLimitsService = { checkAlertChannel: jest.fn().mockReturnValue({ allowed: true }) };
+
     const module = await Test.createTestingModule({
       providers: [
         AlertsService,
         { provide: getRepositoryToken(Alert), useValue: alertRepo },
         { provide: getRepositoryToken(Execution), useValue: execRepo },
         { provide: getRepositoryToken(Job), useValue: jobRepo },
+        { provide: getRepositoryToken(Project), useValue: projectRepo },
+        { provide: getRepositoryToken(User), useValue: userRepo },
         { provide: EmailNotifier, useValue: emailNotifier },
+        { provide: PlanLimitsService, useValue: planLimitsService },
       ],
     }).compile();
 

@@ -3,6 +3,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { Project } from './project.entity';
+import { User } from '../../entities/user.entity';
+import { PlanLimitsService } from '../subscription/plan-limits.service';
 
 describe('ProjectsService', () => {
   let service: ProjectsService;
@@ -17,10 +19,15 @@ describe('ProjectsService', () => {
       delete: jest.fn(),
     };
 
+    const userRepo = { findOne: jest.fn().mockResolvedValue({ id: 'user-1', polarCustomerId: null }) };
+    const planLimitsService = { canCreateProject: jest.fn().mockResolvedValue({ allowed: true }) };
+
     const module = await Test.createTestingModule({
       providers: [
         ProjectsService,
         { provide: getRepositoryToken(Project), useValue: projectRepo },
+        { provide: getRepositoryToken(User), useValue: userRepo },
+        { provide: PlanLimitsService, useValue: planLimitsService },
       ],
     }).compile();
 

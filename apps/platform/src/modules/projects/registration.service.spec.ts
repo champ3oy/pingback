@@ -3,6 +3,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { RegistrationService } from './registration.service';
 import { Job } from '../jobs/job.entity';
 import { Project } from './project.entity';
+import { User } from '../../entities/user.entity';
+import { PlanLimitsService } from '../subscription/plan-limits.service';
 
 describe('RegistrationService', () => {
   let service: RegistrationService;
@@ -12,17 +14,22 @@ describe('RegistrationService', () => {
   beforeEach(async () => {
     jobRepo = {
       findOne: jest.fn(),
-      create: jest.fn(),
+      create: jest.fn().mockImplementation((data) => data),
       save: jest.fn(),
       createQueryBuilder: jest.fn(),
     };
-    projectRepo = { update: jest.fn().mockResolvedValue({}) };
+    projectRepo = { update: jest.fn().mockResolvedValue({}), findOne: jest.fn().mockResolvedValue({ id: 'proj-1', userId: 'user-1' }) };
+
+    const userRepo = { findOne: jest.fn() };
+    const planLimitsService = { canCreateJob: jest.fn().mockResolvedValue({ allowed: true }), capRetries: jest.fn((_, r) => r) };
 
     const module = await Test.createTestingModule({
       providers: [
         RegistrationService,
         { provide: getRepositoryToken(Job), useValue: jobRepo },
         { provide: getRepositoryToken(Project), useValue: projectRepo },
+        { provide: getRepositoryToken(User), useValue: userRepo },
+        { provide: PlanLimitsService, useValue: planLimitsService },
       ],
     }).compile();
 
