@@ -29,25 +29,35 @@ export function clearTokens() {
   window.location.href = "/login";
 }
 
+let refreshPromise: Promise<string | null> | null = null;
+
 async function refreshAccessToken(): Promise<string | null> {
-  const refreshToken = getCookie("pingback_refresh_token");
-  if (!refreshToken) return null;
+  if (refreshPromise) return refreshPromise;
 
-  try {
-    const res = await fetch(`${API_URL}/auth/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
-    });
+  refreshPromise = (async () => {
+    const refreshToken = getCookie("pingback_refresh_token");
+    if (!refreshToken) return null;
 
-    if (!res.ok) return null;
+    try {
+      const res = await fetch(`${API_URL}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
 
-    const data = await res.json();
-    setTokens(data.accessToken, data.refreshToken);
-    return data.accessToken;
-  } catch {
-    return null;
-  }
+      if (!res.ok) return null;
+
+      const data = await res.json();
+      setTokens(data.accessToken, data.refreshToken);
+      return data.accessToken;
+    } catch {
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 async function fetchWithAuth(

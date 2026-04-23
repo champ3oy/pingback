@@ -47,7 +47,7 @@ export function ProjectSwitcher() {
         {projects?.map((project) => (
           <DropdownMenuItem
             key={project.id}
-            onClick={() => router.push(`/${project.id}/crons`)}
+            onClick={() => router.push(`/${project.id}/runs`)}
             className={project.id === projectId ? "bg-muted" : ""}
           >
             <ProjectAvatar id={project.id} size={16} />
