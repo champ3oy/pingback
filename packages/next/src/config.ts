@@ -30,7 +30,7 @@ export function defineConfig(userConfig: PingbackUserConfig): PingbackConfig {
   }
   return {
     apiKey: userConfig.apiKey,
-    baseUrl: userConfig.baseUrl,
+    baseUrl: userConfig.baseUrl || process.env.PINGBACK_BASE_URL,
     platformUrl: userConfig.platformUrl || DEFAULTS.platformUrl,
     routePath: userConfig.routePath || DEFAULTS.routePath,
     functionsDir: userConfig.functionsDir || DEFAULTS.functionsDir,

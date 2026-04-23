@@ -177,8 +177,8 @@ export class ExecutionsService {
   ) {
     const intervalMs = (hours * 60 * 60 * 1000) / buckets;
     const now = new Date();
-    const fromRaw = now.getTime() - hours * 60 * 60 * 1000;
-    const from = new Date(Math.floor(fromRaw / intervalMs) * intervalMs);
+    const toAligned = new Date(Math.ceil(now.getTime() / intervalMs) * intervalMs);
+    const from = new Date(toAligned.getTime() - buckets * intervalMs);
 
     const rows = await this.execRepo
       .createQueryBuilder('exec')
