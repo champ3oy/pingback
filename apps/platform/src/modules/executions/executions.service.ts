@@ -296,6 +296,7 @@ export class ExecutionsService {
         id: exec.id,
         functionName: exec.job?.name ?? 'unknown',
         type: exec.job?.type ?? 'task',
+        schedule: exec.job?.schedule ?? null,
         status: exec.status,
         durationMs: exec.durationMs,
         attempt: exec.attempt,
@@ -304,6 +305,8 @@ export class ExecutionsService {
         jobId: exec.jobId,
         scheduledAt: exec.scheduledAt,
         completedAt: exec.completedAt,
+        errorMessage: exec.errorMessage ?? null,
+        payload: exec.payload ?? null,
       })),
     };
   }

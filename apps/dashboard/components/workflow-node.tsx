@@ -17,10 +17,21 @@ const statusColor: Record<string, string> = {
   pending: "#8a8a80",
 };
 
+function truncatePayload(payload: any): string {
+  if (!payload) return "";
+  try {
+    const str = typeof payload === "string" ? payload : JSON.stringify(payload);
+    return str.length > 60 ? str.slice(0, 57) + "..." : str;
+  } catch {
+    return "";
+  }
+}
+
 export interface WorkflowNodeData {
   id: string;
   functionName: string;
   type: string;
+  schedule: string | null;
   status: "pending" | "running" | "success" | "failed";
   durationMs: number | null;
   attempt: number;
@@ -30,6 +41,7 @@ export interface WorkflowNodeData {
   isCurrent: boolean;
   onRetry?: (jobId: string, payload?: any) => void;
   payload?: any;
+  errorMessage?: string | null;
   [key: string]: unknown;
 }
 
@@ -37,10 +49,11 @@ function WorkflowNodeComponent({ data }: NodeProps) {
   const d = data as unknown as WorkflowNodeData;
   const maxAttempts = d.maxRetries + 1;
   const typeColor = typeDotColor[d.type] || "#8a8a80";
+  const payloadPreview = truncatePayload(d.payload);
 
   return (
     <div
-      className="rounded-lg min-w-[210px] max-w-[240px] overflow-hidden"
+      className="rounded-lg min-w-[220px] max-w-[260px] overflow-hidden"
       style={{
         backgroundColor: "#1e1e1a",
         border: d.isCurrent
@@ -77,6 +90,26 @@ function WorkflowNodeComponent({ data }: NodeProps) {
 
       {/* Body */}
       <div className="px-3 py-2 space-y-1.5">
+        {/* Schedule (cron only) */}
+        {d.type === "cron" && d.schedule && (
+          <div
+            className="font-mono text-[10px] px-1.5 py-0.5 rounded"
+            style={{ backgroundColor: "#2a2a25", color: "#8a8a80" }}
+          >
+            {d.schedule}
+          </div>
+        )}
+
+        {/* Payload preview (task only) */}
+        {d.type === "task" && payloadPreview && (
+          <div
+            className="text-[10px] font-mono px-1.5 py-0.5 rounded truncate"
+            style={{ backgroundColor: "#2a2a25", color: "#8a8a80" }}
+          >
+            {payloadPreview}
+          </div>
+        )}
+
         {/* Status + duration */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
@@ -95,6 +128,16 @@ function WorkflowNodeComponent({ data }: NodeProps) {
             {formatDuration(d.durationMs)}
           </span>
         </div>
+
+        {/* Error message (failed only) */}
+        {d.status === "failed" && d.errorMessage && (
+          <div
+            className="text-[10px] px-1.5 py-0.5 rounded truncate"
+            style={{ backgroundColor: "rgba(212,115,74,0.1)", color: "#d4734a" }}
+          >
+            {d.errorMessage}
+          </div>
+        )}
 
         {/* Attempt + retry */}
         <div className="flex items-center justify-between">

@@ -14,8 +14,8 @@ import { type WorkflowNode } from "@/lib/hooks/use-executions";
 import { apiClient } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 
-const NODE_WIDTH = 220;
-const NODE_HEIGHT = 90;
+const NODE_WIDTH = 240;
+const NODE_HEIGHT = 130;
 
 const statusEdgeColor: Record<string, string> = {
   success: "#a8b545",

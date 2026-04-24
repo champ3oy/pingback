@@ -109,6 +109,7 @@ export interface WorkflowNode {
   id: string;
   functionName: string;
   type: string;
+  schedule: string | null;
   status: "pending" | "running" | "success" | "failed";
   durationMs: number | null;
   attempt: number;
@@ -117,6 +118,8 @@ export interface WorkflowNode {
   jobId: string;
   scheduledAt: string;
   completedAt: string | null;
+  errorMessage: string | null;
+  payload: any;
 }
 
 export interface WorkflowTree {
