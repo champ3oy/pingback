@@ -1,7 +1,8 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { IconLoader2 } from "@tabler/icons-react";
 import { formatDuration } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 
@@ -63,6 +64,7 @@ export interface WorkflowNodeData {
 
 function WorkflowNodeComponent({ data }: NodeProps) {
   const d = data as unknown as WorkflowNodeData;
+  const [retrying, setRetrying] = useState(false);
   const maxAttempts = d.maxRetries + 1;
   const typeColor = typeDotColor[d.type] || "#8a8a80";
 
@@ -143,12 +145,22 @@ function WorkflowNodeComponent({ data }: NodeProps) {
               variant="outline"
               size="xs"
               className="h-5 text-[10px] px-1.5"
-              onClick={(e) => {
+              disabled={retrying}
+              onClick={async (e) => {
                 e.stopPropagation();
-                d.onRetry!(d.id);
+                setRetrying(true);
+                try {
+                  await d.onRetry!(d.id);
+                } finally {
+                  setRetrying(false);
+                }
               }}
             >
-              Retry
+              {retrying ? (
+                <IconLoader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                "Retry"
+              )}
             </Button>
           )}
         </div>
