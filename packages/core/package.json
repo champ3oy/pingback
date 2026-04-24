@@ -1,6 +1,6 @@
 {
   "name": "@usepingback/core",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Framework-agnostic core for Pingback SDKs — function registry, context, signing, and registration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
