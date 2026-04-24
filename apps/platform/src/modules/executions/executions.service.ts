@@ -180,6 +180,43 @@ export class ExecutionsService {
     return this.execRepo.save(exec);
   }
 
+  async retryExecution(id: string) {
+    const exec = await this.execRepo.findOne({
+      where: { id },
+      relations: ['job'],
+    });
+    if (!exec) throw new NotFoundException('Execution not found');
+    if (exec.status !== 'failed') {
+      throw new Error('Only failed executions can be retried');
+    }
+
+    // Save current failed state to attempt history
+    const attemptRecord = {
+      attempt: exec.attempt,
+      status: 'failed' as const,
+      startedAt: exec.startedAt?.toISOString() || null,
+      completedAt: exec.completedAt?.toISOString() || null,
+      durationMs: exec.durationMs ?? null,
+      httpStatus: exec.httpStatus ?? null,
+      errorMessage: exec.errorMessage ?? null,
+      logs: exec.logs || [],
+    };
+
+    exec.attempts = [...(exec.attempts || []), attemptRecord];
+    exec.attempt += 1;
+    exec.status = 'pending';
+    exec.startedAt = null as any;
+    exec.completedAt = null as any;
+    exec.durationMs = null as any;
+    exec.httpStatus = null as any;
+    exec.responseBody = null as any;
+    exec.errorMessage = null as any;
+    exec.logs = [];
+
+    await this.execRepo.save(exec);
+    return exec;
+  }
+
   async getHistogram(
     projectId: string,
     hours = 48,

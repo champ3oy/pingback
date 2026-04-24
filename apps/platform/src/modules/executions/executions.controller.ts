@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Param,
   Query,
   UseGuards,
@@ -13,6 +14,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProjectsService } from '../projects/projects.service';
 import { ExecutionsService } from './executions.service';
 import { ExecutionResponse, PaginatedExecutionsResponse } from './dto/execution-response.dto';
+import { QueueService } from '../queue/queue.service';
 
 @ApiTags('Executions')
 @ApiBearerAuth('api-key')
@@ -57,6 +59,7 @@ export class ExecutionsDashboardController {
   constructor(
     private executionsService: ExecutionsService,
     private projectsService: ProjectsService,
+    private queueService: QueueService,
   ) {}
 
   @Get('executions')
@@ -131,6 +134,38 @@ export class ExecutionsDashboardController {
     const user = req.user as { id: string };
     await this.projectsService.findOneByUser(projectId, user.id);
     return this.executionsService.getWorkflowTree(id);
+  }
+
+  @Post('executions/:id/retry')
+  @ApiOperation({ summary: 'Retry a failed execution (dashboard)' })
+  @ApiParam({ name: 'projectId', description: 'Project UUID' })
+  @ApiParam({ name: 'id', description: 'Execution UUID' })
+  @ApiResponse({ status: 200, description: 'Execution re-queued' })
+  @ApiResponse({ status: 404, description: 'Execution not found' })
+  async retryExecution(
+    @Req() req: Request,
+    @Param('projectId') projectId: string,
+    @Param('id') id: string,
+  ) {
+    const user = req.user as { id: string };
+    const project = await this.projectsService.findOneByUser(projectId, user.id);
+    const exec = await this.executionsService.retryExecution(id);
+
+    await this.queueService.send('pingback-execution', {
+      executionId: exec.id,
+      jobId: exec.jobId,
+      projectId,
+      functionName: exec.job.name,
+      endpointUrl: project.endpointUrl,
+      cronSecret: project.cronSecret,
+      attempt: exec.attempt,
+      maxRetries: exec.job.retries,
+      timeoutSeconds: exec.job.timeoutSeconds,
+      scheduledAt: new Date().toISOString(),
+      ...(exec.payload !== undefined && exec.payload !== null ? { payload: exec.payload } : {}),
+    });
+
+    return { message: 'Execution retried', executionId: exec.id };
   }
 
   @Get('executions/:id')

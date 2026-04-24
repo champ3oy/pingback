@@ -53,7 +53,7 @@ export interface WorkflowNodeData {
   jobId: string;
   isCurrent: boolean;
   isExpanded: boolean;
-  onRetry?: (jobId: string, payload?: any, parentId?: string | null) => void;
+  onRetry?: (executionId: string) => void;
   onNavigate?: (executionId: string) => void;
   payload?: any;
   errorMessage?: string | null;
@@ -145,7 +145,7 @@ function WorkflowNodeComponent({ data }: NodeProps) {
               className="h-5 text-[10px] px-1.5"
               onClick={(e) => {
                 e.stopPropagation();
-                d.onRetry!(d.jobId, d.payload, d.parentId);
+                d.onRetry!(d.id);
               }}
             >
               Retry

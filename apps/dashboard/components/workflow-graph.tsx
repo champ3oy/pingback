@@ -75,13 +75,9 @@ export function WorkflowGraph({
   const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
 
   const handleRetry = useCallback(
-    async (jobId: string, payload?: any, parentId?: string | null) => {
-      const body: { payload?: any; parentId?: string } = {};
-      if (payload !== undefined) body.payload = payload;
-      if (parentId) body.parentId = parentId;
+    async (executionId: string) => {
       await apiClient.post(
-        `/api/v1/projects/${projectId}/jobs/${jobId}/run`,
-        Object.keys(body).length > 0 ? body : undefined,
+        `/api/v1/projects/${projectId}/executions/${executionId}/retry`,
       );
       queryClient.invalidateQueries({ queryKey: ["workflow"] });
       queryClient.invalidateQueries({ queryKey: ["executions"] });
