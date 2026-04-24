@@ -2,13 +2,19 @@
 
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { StatusBadge } from "@/components/status-badge";
 import { formatDuration } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 
 const typeDotColor: Record<string, string> = {
   cron: "#5b9bd5",
   task: "#d4a574",
+};
+
+const statusColor: Record<string, string> = {
+  success: "#a8b545",
+  failed: "#d4734a",
+  running: "#e8b44a",
+  pending: "#8a8a80",
 };
 
 export interface WorkflowNodeData {
@@ -73,7 +79,18 @@ function WorkflowNodeComponent({ data }: NodeProps) {
       <div className="px-3 py-2 space-y-1.5">
         {/* Status + duration */}
         <div className="flex items-center justify-between">
-          <StatusBadge status={d.status} />
+          <div className="flex items-center gap-1.5">
+            <span
+              className="h-1.5 w-1.5 rounded-full shrink-0"
+              style={{ backgroundColor: statusColor[d.status] || "#8a8a80" }}
+            />
+            <span
+              className="text-[10px] font-medium capitalize"
+              style={{ color: statusColor[d.status] || "#8a8a80" }}
+            >
+              {d.status}
+            </span>
+          </div>
           <span className="text-[10px] text-muted-foreground tabular-nums">
             {formatDuration(d.durationMs)}
           </span>
