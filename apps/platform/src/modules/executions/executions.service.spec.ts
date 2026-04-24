@@ -95,6 +95,26 @@ describe('ExecutionsService', () => {
         NotFoundException,
       );
     });
+
+    it('should include hasChildren=true when children exist', async () => {
+      const exec = { id: 'exec-1', parentId: null, job: { name: 'test' } };
+      execRepo.findOne.mockResolvedValue(exec);
+      execRepo.count.mockResolvedValue(2);
+
+      const result = await service.findOne('exec-1');
+
+      expect(result.hasChildren).toBe(true);
+    });
+
+    it('should include hasChildren=false when no children', async () => {
+      const exec = { id: 'exec-1', parentId: null, job: { name: 'test' } };
+      execRepo.findOne.mockResolvedValue(exec);
+      execRepo.count.mockResolvedValue(0);
+
+      const result = await service.findOne('exec-1');
+
+      expect(result.hasChildren).toBe(false);
+    });
   });
 
   describe('getWorkflowTree', () => {

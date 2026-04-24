@@ -66,7 +66,10 @@ export class ExecutionsService {
       relations: ['job'],
     });
     if (!exec) throw new NotFoundException('Execution not found');
-    return exec;
+
+    const childCount = await this.execRepo.count({ where: { parentId: id } });
+
+    return { ...exec, hasChildren: childCount > 0 };
   }
 
   async findByJob(jobId: string, page = 1, limit = 20) {
