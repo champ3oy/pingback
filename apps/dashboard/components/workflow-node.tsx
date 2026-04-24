@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { formatDuration } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,7 @@ export interface WorkflowNodeData {
   parentId: string | null;
   jobId: string;
   isCurrent: boolean;
+  isExpanded: boolean;
   onRetry?: (jobId: string, payload?: any) => void;
   payload?: any;
   errorMessage?: string | null;
@@ -61,7 +62,6 @@ export interface WorkflowNodeData {
 
 function WorkflowNodeComponent({ data }: NodeProps) {
   const d = data as unknown as WorkflowNodeData;
-  const [expanded, setExpanded] = useState(false);
   const maxAttempts = d.maxRetries + 1;
   const typeColor = typeDotColor[d.type] || "#8a8a80";
 
@@ -87,9 +87,8 @@ function WorkflowNodeComponent({ data }: NodeProps) {
 
       {/* Header */}
       <div
-        className="flex items-center justify-between px-3 py-1.5 cursor-pointer"
+        className="flex items-center justify-between px-3 py-1.5"
         style={{ borderBottom: "1px solid #3a3a35" }}
-        onClick={() => hasDetails && setExpanded(!expanded)}
       >
         <div className="flex items-center gap-1.5">
           <span
@@ -149,7 +148,7 @@ function WorkflowNodeComponent({ data }: NodeProps) {
       </div>
 
       {/* Expanded details */}
-      {expanded && hasDetails && (
+      {d.isExpanded && hasDetails && (
         <div
           className="px-3 py-2 space-y-2"
           style={{ borderTop: "1px solid #3a3a35" }}

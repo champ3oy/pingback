@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   ReactFlow,
   Controls,
@@ -14,8 +14,8 @@ import { type WorkflowNode } from "@/lib/hooks/use-executions";
 import { apiClient } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 
-const NODE_WIDTH = 240;
-const NODE_HEIGHT = 130;
+const NODE_WIDTH = 230;
+const NODE_HEIGHT = 110;
 
 const statusEdgeColor: Record<string, string> = {
   success: "#a8b545",
@@ -70,6 +70,7 @@ export function WorkflowGraph({
   projectId,
 }: WorkflowGraphProps) {
   const queryClient = useQueryClient();
+  const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
 
   const handleRetry = useCallback(
     async (jobId: string, payload?: any) => {
@@ -83,6 +84,10 @@ export function WorkflowGraph({
     [projectId, queryClient],
   );
 
+  const handleNodeClick = useCallback((_: any, node: Node) => {
+    setExpandedNodeId((prev) => (prev === node.id ? null : node.id));
+  }, []);
+
   const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
     const rfNodes: Node[] = workflowNodes.map((node) => ({
       id: node.id,
@@ -91,6 +96,7 @@ export function WorkflowGraph({
       data: {
         ...node,
         isCurrent: node.id === currentExecutionId,
+        isExpanded: node.id === expandedNodeId,
         onRetry: handleRetry,
       } as WorkflowNodeData,
     }));
@@ -109,7 +115,7 @@ export function WorkflowGraph({
       }));
 
     return getLayoutedElements(rfNodes, rfEdges);
-  }, [workflowNodes, currentExecutionId, handleRetry]);
+  }, [workflowNodes, currentExecutionId, expandedNodeId, handleRetry]);
 
   return (
     <div style={{ height: 450 }} className="w-full workflow-graph-dark">
@@ -137,11 +143,11 @@ export function WorkflowGraph({
         nodes={layoutedNodes}
         edges={layoutedEdges}
         nodeTypes={nodeTypes}
+        onNodeClick={handleNodeClick}
         fitView
         proOptions={{ hideAttribution: true }}
         nodesDraggable={false}
         nodesConnectable={false}
-        elementsSelectable={false}
         panOnDrag
         zoomOnScroll
         minZoom={0.3}
