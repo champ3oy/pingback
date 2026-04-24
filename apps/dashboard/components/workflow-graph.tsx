@@ -112,10 +112,27 @@ export function WorkflowGraph({
   }, [workflowNodes, currentExecutionId, handleRetry]);
 
   return (
-    <div
-      style={{ height: 450 }}
-      className="w-full [&_.react-flow__background]:!bg-transparent [&_.react-flow__pane]:!bg-transparent [&_.react-flow__controls_button]:!bg-[#1e1e1a] [&_.react-flow__controls_button]:!border-[#3a3a35] [&_.react-flow__controls_button]:!fill-[#8a8a80] [&_.react-flow__controls_button:hover]:!fill-[#f5f5f0]"
-    >
+    <div style={{ height: 450 }} className="w-full workflow-graph-dark">
+      <style>{`
+        .workflow-graph-dark .react-flow__controls {
+          background: #1e1e1a;
+          border: 1px solid #3a3a35;
+          border-radius: 6px;
+          box-shadow: none;
+        }
+        .workflow-graph-dark .react-flow__controls button {
+          background: #1e1e1a;
+          border-color: #3a3a35;
+          fill: #8a8a80;
+        }
+        .workflow-graph-dark .react-flow__controls button:hover {
+          background: #2a2a25;
+          fill: #f5f5f0;
+        }
+        .workflow-graph-dark .react-flow__controls button svg {
+          fill: inherit;
+        }
+      `}</style>
       <ReactFlow
         nodes={layoutedNodes}
         edges={layoutedEdges}
@@ -133,11 +150,6 @@ export function WorkflowGraph({
         <Controls
           showInteractive={false}
           position="bottom-right"
-          style={{
-            backgroundColor: "#1e1e1a",
-            border: "1px solid #3a3a35",
-            borderRadius: 6,
-          }}
         />
       </ReactFlow>
     </div>
