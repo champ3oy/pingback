@@ -54,7 +54,7 @@ function WorkflowNodeComponent({ data }: NodeProps) {
       >
         <div className="flex items-center gap-1.5">
           <span
-            className="h-2.5 w-2.5 rounded-sm shrink-0"
+            className="h-3 w-3 rounded shrink-0"
             style={{ backgroundColor: typeColor }}
           />
           <span className="text-xs font-semibold text-foreground truncate">
