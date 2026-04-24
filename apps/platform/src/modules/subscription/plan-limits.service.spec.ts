@@ -4,11 +4,13 @@ import { PlanLimitsService } from './plan-limits.service';
 import { User } from '../../entities/user.entity';
 import { Project } from '../projects/project.entity';
 import { Job } from '../jobs/job.entity';
+import { Execution } from '../executions/execution.entity';
 
 describe('PlanLimitsService', () => {
   let service: PlanLimitsService;
   let projectRepo: Record<string, jest.Mock>;
   let jobRepo: Record<string, jest.Mock>;
+  let execRepo: Record<string, jest.Mock>;
 
   const freeUser = {
     id: 'user-1',
@@ -27,12 +29,14 @@ describe('PlanLimitsService', () => {
   beforeEach(async () => {
     projectRepo = { count: jest.fn() };
     jobRepo = { count: jest.fn() };
+    execRepo = { createQueryBuilder: jest.fn().mockReturnValue({ innerJoin: jest.fn().mockReturnThis(), where: jest.fn().mockReturnThis(), andWhere: jest.fn().mockReturnThis(), getCount: jest.fn().mockResolvedValue(0) }) };
 
     const module = await Test.createTestingModule({
       providers: [
         PlanLimitsService,
         { provide: getRepositoryToken(Project), useValue: projectRepo },
         { provide: getRepositoryToken(Job), useValue: jobRepo },
+        { provide: getRepositoryToken(Execution), useValue: execRepo },
       ],
     }).compile();
 

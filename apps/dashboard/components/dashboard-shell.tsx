@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
-import { UpgradeBanner } from "@/components/upgrade-banner";
 import { IconMenu2 } from "@tabler/icons-react";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -47,7 +46,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <main className="md:ml-52 pt-12 md:pt-0">
-        <UpgradeBanner />
         {children}
       </main>
     </div>

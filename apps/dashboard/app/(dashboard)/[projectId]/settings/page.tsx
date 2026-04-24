@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IconCheck, IconCopy, IconExternalLink } from "@tabler/icons-react";
+import { IconCheck, IconCopy, IconExternalLink, IconFolderFilled, IconClockFilled, IconPlayerPlayFilled } from "@tabler/icons-react";
 import { useProject, useDeleteProject } from "@/lib/hooks/use-projects";
 import { useSubscription, useCheckout, usePortal } from "@/lib/hooks/use-subscription";
 import { apiClient } from "@/lib/api";
@@ -31,23 +31,51 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
   );
 }
 
-function UsageBar({ label, used, limit }: { label: string; used: number; limit: number | null }) {
+function PlanCard({ name, price, onSelect, disabled }: {
+  name: string;
+  price: string;
+  onSelect: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div
+      className="rounded-xl p-5 flex flex-col justify-between gap-6"
+      style={{ backgroundColor: "rgba(255, 255, 255, 0.03)" }}
+    >
+      <div>
+        <span className="text-xs text-muted-foreground">{name}</span>
+      </div>
+      <div>
+        <span className="text-2xl font-semibold">{price}</span>
+      </div>
+      <Button
+        size="sm"
+        onClick={onSelect}
+        disabled={disabled}
+        className="w-fit px-6 rounded-lg"
+        variant="outline"
+      >
+        {disabled ? "Redirecting..." : `Upgrade to ${name}`}
+      </Button>
+    </div>
+  );
+}
+
+function UsageBar({ label, used, limit, color, icon }: { label: string; used: number; limit: number | null; color: string; icon?: React.ReactNode }) {
   const isUnlimited = limit === null || limit === Infinity;
   const percentage = isUnlimited ? 0 : Math.min((used / limit) * 100, 100);
-  const color =
-    percentage >= 100 ? "bg-red-500" : percentage >= 80 ? "bg-amber-500" : "bg-emerald-500";
   const limitDisplay = isUnlimited ? "Unlimited" : limit.toLocaleString();
 
   return (
     <div>
       <div className="flex justify-between text-xs text-muted-foreground mb-1">
-        <span>{label}</span>
+        <span className="flex items-center gap-1.5">{icon}{label}</span>
         <span>{used.toLocaleString()} / {limitDisplay}</span>
       </div>
-      <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--muted)" }}>
+      <div className="h-5 rounded-md overflow-hidden" style={{ backgroundColor: "var(--muted)" }}>
         <div
-          className={`h-full rounded-full transition-all ${color}`}
-          style={{ width: `${isUnlimited ? 0 : percentage}%` }}
+          className="h-full rounded-md transition-all"
+          style={{ width: `${isUnlimited ? 0 : percentage}%`, backgroundColor: color }}
         />
       </div>
     </div>
@@ -154,24 +182,55 @@ export default function ProjectSettingsPage() {
           </div>
           <div className="p-4 space-y-4">
             {usage && (
-              <div className="space-y-3">
-                <UsageBar label="Projects" used={usage.projects.used} limit={usage.projects.limit} />
-                <UsageBar label="Jobs" used={usage.jobs.used} limit={usage.jobs.limit} />
-                <UsageBar label="Executions this month" used={usage.executions.used} limit={usage.executions.limit} />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <UsageBar label="Projects" used={usage.projects.used} limit={usage.projects.limit} color="#c47ddb" icon={<IconFolderFilled className="h-3.5 w-3.5" />} />
+                <UsageBar label="Jobs" used={usage.jobs.used} limit={usage.jobs.limit} color="#a8b545" icon={<IconClockFilled className="h-3.5 w-3.5" />} />
+                <UsageBar label="Executions" used={usage.executions.used} limit={usage.executions.limit} color="#6b9ece" icon={<IconPlayerPlayFilled className="h-3.5 w-3.5" />} />
               </div>
             )}
-            <div className="flex gap-2 pt-2">
-              {(!usage || usage.plan !== "team") && (
-                <Button
-                  size="sm"
-                  onClick={() => checkout.mutate((!usage || usage.plan === "free") ? "pro" : "team")}
-                  disabled={checkout.isPending}
-                  style={{ backgroundColor: "#d4a574", color: "#000", borderColor: "#d4a574" }}
-                >
-                  {checkout.isPending ? "Redirecting..." : `Upgrade to ${(!usage || usage.plan === "free") ? "Pro" : "Team"}`}
-                </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+              {(!usage || usage.plan === "free") && (
+                <>
+                  <PlanCard
+                    name="Pro"
+                    price="$12/mo"
+
+                    onSelect={() => checkout.mutate("pro")}
+                    disabled={checkout.isPending}
+
+                  />
+                  <PlanCard
+                    name="Team"
+                    price="$39/mo"
+
+                    onSelect={() => checkout.mutate("team")}
+                    disabled={checkout.isPending}
+                  />
+                </>
               )}
-              {usage && usage.plan !== "free" && (
+              {usage && usage.plan === "pro" && (
+                <>
+                  <PlanCard
+                    name="Team"
+                    price="$39/mo"
+
+                    onSelect={() => checkout.mutate("team")}
+                    disabled={checkout.isPending}
+
+                  />
+                  <div className="flex items-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => portal.mutate()}
+                      disabled={portal.isPending}
+                    >
+                      {portal.isPending ? "Redirecting..." : "Manage Billing"}
+                    </Button>
+                  </div>
+                </>
+              )}
+              {usage && usage.plan === "team" && (
                 <Button
                   variant="outline"
                   size="sm"

@@ -120,7 +120,7 @@ export class ExecutionsService {
     }
     if (filters?.q) {
       qb.andWhere(
-        `(exec.error_message ILIKE :q OR exec.response_body ILIKE :q OR job.name ILIKE :q OR EXISTS (SELECT 1 FROM jsonb_array_elements(exec.logs) AS log WHERE log->>'message' ILIKE :q))`,
+        `(exec.error_message ILIKE :q OR exec.response_body ILIKE :q OR job.name ILIKE :q OR CAST(exec.payload AS text) ILIKE :q OR EXISTS (SELECT 1 FROM jsonb_array_elements(exec.logs) AS log WHERE log->>'message' ILIKE :q))`,
         { q: `%${filters.q}%` },
       );
     }

@@ -18,7 +18,7 @@ export function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md hover:bg-secondary transition-colors outline-none">
+      <DropdownMenuTrigger className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md hover:bg-secondary transition-colors outline-none overflow-hidden">
         <img
           src="https://api.dicebear.com/9.x/glass/svg?seed=account"
           alt=""
@@ -26,7 +26,7 @@ export function UserMenu() {
           height={24}
           className="rounded shrink-0"
         />
-        <span className="text-sm text-muted-foreground truncate">Account</span>
+        <span className="text-sm text-muted-foreground truncate min-w-0">Account</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-48">
         <DropdownMenuItem onClick={() => router.push("/account")}>

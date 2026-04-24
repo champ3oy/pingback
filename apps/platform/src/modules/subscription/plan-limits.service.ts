@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { Project } from '../projects/project.entity';
 import { Job } from '../jobs/job.entity';
+import { Execution } from '../executions/execution.entity';
 import { PLAN_LIMITS, PlanType } from './plan-limits';
 
 interface LimitCheck {
@@ -16,6 +17,7 @@ export class PlanLimitsService {
   constructor(
     @InjectRepository(Project) private projectRepo: Repository<Project>,
     @InjectRepository(Job) private jobRepo: Repository<Job>,
+    @InjectRepository(Execution) private execRepo: Repository<Execution>,
   ) {}
 
   private limits(user: User) {
@@ -104,12 +106,25 @@ export class PlanLimitsService {
       .andWhere('job.status = :status', { status: 'active' })
       .getCount();
 
+    // Count actual executions this month from the database
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const executionCount = await this.execRepo
+      .createQueryBuilder('execution')
+      .innerJoin('execution.job', 'job')
+      .innerJoin('job.project', 'project')
+      .where('project.user_id = :userId', { userId: user.id })
+      .andWhere('execution.created_at >= :startOfMonth', { startOfMonth })
+      .getCount();
+
     return {
       plan: user.plan,
       projects: { used: projectCount, limit: limits.projects },
       jobs: { used: jobCount, limit: limits.jobs },
       executions: {
-        used: user.executionsThisMonth,
+        used: executionCount,
         limit: limits.executionsPerMonth,
         resetsAt: user.executionsResetAt,
       },

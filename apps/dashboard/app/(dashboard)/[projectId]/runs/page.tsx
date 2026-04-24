@@ -12,6 +12,7 @@ import {
   IconLoader2,
   IconSearch,
 } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { StatusBadge } from "@/components/status-badge";
 import { CodeBlock } from "@/components/code-block";
@@ -502,33 +503,31 @@ export default function RunsPage() {
 
   return (
     <div>
-      <PageHeader title="Runs" />
+      <PageHeader title="Runs">
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          setSearch(query);
+          setPage(1);
+        }} className="flex gap-2">
+          <Input
+            placeholder="Search runs..."
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (!e.target.value) {
+                setSearch("");
+                setPage(1);
+              }
+            }}
+            className="w-64"
+          />
+          <Button type="submit" variant="outline" size="icon">
+            <IconSearch className="h-4 w-4" />
+          </Button>
+        </form>
+      </PageHeader>
       <div className="p-6">
         <ExecutionChart projectId={projectId} />
-        <form
-          className="mb-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSearch(query);
-            setPage(1);
-          }}
-        >
-          <div className="relative">
-            <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input
-              placeholder="Search runs..."
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                if (!e.target.value) {
-                  setSearch("");
-                  setPage(1);
-                }
-              }}
-              className="pl-8 h-8 text-xs"
-            />
-          </div>
-        </form>
         <DataTable
           columns={columns}
           data={data?.items}

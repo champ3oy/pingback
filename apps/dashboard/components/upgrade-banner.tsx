@@ -25,14 +25,15 @@ export function UpgradeBanner() {
   const nextPlan = usage.plan === "free" ? "pro" : "team";
 
   return (
-    <div className="mx-4 mt-4 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5 flex items-center justify-between">
-      <p className="text-xs text-amber-600 dark:text-amber-400">
-        You&apos;ve used {warnings.join(", ")}. Consider upgrading for higher limits.
+    <div className="mx-2 mb-2 p-3 rounded-lg" style={{ backgroundColor: "rgba(212, 165, 116, 0.08)" }}>
+      <p className="text-[11px] mb-2" style={{ color: "#d4a574" }}>
+        You&apos;ve used {warnings.join(", ")}.
       </p>
       <button
         onClick={() => checkout.mutate(nextPlan as "pro" | "team")}
         disabled={checkout.isPending}
-        className="text-xs font-medium px-3 py-1 rounded-full bg-amber-500 text-white hover:bg-amber-600 transition-colors shrink-0 ml-3"
+        className="text-[11px] font-medium w-full py-1.5 rounded-md transition-opacity hover:opacity-90"
+        style={{ backgroundColor: "#d4a574", color: "#000" }}
       >
         {checkout.isPending ? "..." : `Upgrade to ${nextPlan}`}
       </button>

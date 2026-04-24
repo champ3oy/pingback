@@ -181,7 +181,7 @@ export function Sidebar() {
       </nav>
 
       <UpgradeBanner />
-      <div className="border-t p-3 py-1">
+      <div className="border-t px-3 py-2">
         <UserMenu />
       </div>
     </aside>
