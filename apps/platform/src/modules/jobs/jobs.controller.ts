@@ -163,17 +163,21 @@ export class JobsDashboardController {
     @Req() req: Request,
     @Param('projectId') projectId: string,
     @Param('id') id: string,
-    @Body() body?: { payload?: any },
+    @Body() body?: { payload?: any; parentId?: string },
   ) {
     const user = req.user as { id: string };
     const project = await this.projectsService.findOneByUser(projectId, user.id);
     const job = await this.jobsService.findOne(id, projectId);
 
+    const opts: { payload?: any; parentId?: string } = {};
+    if (body?.payload !== undefined) opts.payload = body.payload;
+    if (body?.parentId) opts.parentId = body.parentId;
+
     const execution = await this.executionsService.createPending(
       job.id,
       new Date(),
       1,
-      body?.payload !== undefined ? { payload: body.payload } : undefined,
+      Object.keys(opts).length > 0 ? opts : undefined,
     );
 
     await this.queueService.send('pingback-execution', {
