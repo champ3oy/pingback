@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   ReactFlow,
   Controls,
+  useNodesState,
+  useEdgesState,
   type Node,
   type Edge,
 } from "@xyflow/react";
@@ -88,7 +90,7 @@ export function WorkflowGraph({
     setExpandedNodeId((prev) => (prev === node.id ? null : node.id));
   }, []);
 
-  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
+  const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
     const rfNodes: Node[] = workflowNodes.map((node) => ({
       id: node.id,
       type: "workflowNode",
@@ -117,6 +119,22 @@ export function WorkflowGraph({
     return getLayoutedElements(rfNodes, rfEdges);
   }, [workflowNodes, currentExecutionId, expandedNodeId, handleRetry]);
 
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  // Sync node data (expand/collapse, status changes) while preserving drag positions
+  useEffect(() => {
+    setNodes((prev) =>
+      initialNodes.map((newNode) => {
+        const existing = prev.find((n) => n.id === newNode.id);
+        return existing
+          ? { ...newNode, position: existing.position }
+          : newNode;
+      }),
+    );
+    setEdges(initialEdges);
+  }, [initialNodes, initialEdges, setNodes, setEdges]);
+
   return (
     <div style={{ height: 450 }} className="w-full workflow-graph-dark">
       <style>{`
@@ -138,15 +156,23 @@ export function WorkflowGraph({
         .workflow-graph-dark .react-flow__controls button svg {
           fill: inherit;
         }
+        .workflow-graph-dark .react-flow__node {
+          cursor: grab;
+        }
+        .workflow-graph-dark .react-flow__node:active {
+          cursor: grabbing;
+        }
       `}</style>
       <ReactFlow
-        nodes={layoutedNodes}
-        edges={layoutedEdges}
-        nodeTypes={nodeTypes}
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         onNodeClick={handleNodeClick}
+        nodeTypes={nodeTypes}
         fitView
         proOptions={{ hideAttribution: true }}
-        nodesDraggable={false}
+        nodesDraggable
         nodesConnectable={false}
         panOnDrag
         zoomOnScroll
