@@ -27,11 +27,15 @@ describe('createContext', () => {
     expect(typeof logs[0].timestamp).toBe('number');
   });
 
-  test('ctx.task() throws with post-MVP message', async () => {
+  test('ctx.task() collects task requests', async () => {
     const ctx = createContext(payload);
-    await expect(ctx.task('sub-task', { id: 1 })).rejects.toThrow(
-      'ctx.task() is not available',
-    );
+    await ctx.task('sub-task', { id: 1 });
+    await ctx.task('another-task', { id: 2 });
+
+    const tasks = ctx._getTasks();
+    expect(tasks).toHaveLength(2);
+    expect(tasks[0]).toEqual({ name: 'sub-task', payload: { id: 1 } });
+    expect(tasks[1]).toEqual({ name: 'another-task', payload: { id: 2 } });
   });
 
   test('logs start empty', () => {
