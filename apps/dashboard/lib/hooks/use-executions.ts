@@ -31,6 +31,7 @@ export interface Execution {
   createdAt: string;
   job?: { name: string; retries: number; type: "cron" | "task" };
   parent?: { id: string; job?: { name: string } } | null;
+  hasChildren?: boolean;
 }
 
 interface PaginatedResponse<T> {
@@ -101,5 +102,35 @@ export function useChildExecutions(projectId: string, parentId: string) {
       ),
     enabled: !!projectId && !!parentId,
     refetchInterval: 5000,
+  });
+}
+
+export interface WorkflowNode {
+  id: string;
+  functionName: string;
+  type: string;
+  status: "pending" | "running" | "success" | "failed";
+  durationMs: number | null;
+  attempt: number;
+  maxRetries: number;
+  parentId: string | null;
+  jobId: string;
+  scheduledAt: string;
+  completedAt: string | null;
+}
+
+export interface WorkflowTree {
+  rootId: string;
+  nodes: WorkflowNode[];
+}
+
+export function useWorkflowTree(projectId: string, executionId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["workflow", executionId],
+    queryFn: () =>
+      apiClient.get<WorkflowTree>(
+        `/api/v1/projects/${projectId}/executions/${executionId}/workflow`
+      ),
+    enabled: !!projectId && !!executionId && enabled,
   });
 }
