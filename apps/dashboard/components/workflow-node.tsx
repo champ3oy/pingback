@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { formatDuration } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -17,13 +17,26 @@ const statusColor: Record<string, string> = {
   pending: "#8a8a80",
 };
 
-function truncatePayload(payload: any): string {
-  if (!payload) return "";
+function formatJson(value: any): string | null {
+  if (!value) return null;
   try {
-    const str = typeof payload === "string" ? payload : JSON.stringify(payload);
-    return str.length > 60 ? str.slice(0, 57) + "..." : str;
+    const obj = typeof value === "string" ? JSON.parse(value) : value;
+    return JSON.stringify(obj, null, 2);
   } catch {
-    return "";
+    return typeof value === "string" ? value : null;
+  }
+}
+
+function extractResult(responseBody: string | null): string | null {
+  if (!responseBody) return null;
+  try {
+    const parsed = JSON.parse(responseBody);
+    if (parsed.result !== undefined) {
+      return JSON.stringify(parsed.result, null, 2);
+    }
+    return null;
+  } catch {
+    return null;
   }
 }
 
@@ -42,18 +55,23 @@ export interface WorkflowNodeData {
   onRetry?: (jobId: string, payload?: any) => void;
   payload?: any;
   errorMessage?: string | null;
+  responseBody?: string | null;
   [key: string]: unknown;
 }
 
 function WorkflowNodeComponent({ data }: NodeProps) {
   const d = data as unknown as WorkflowNodeData;
+  const [expanded, setExpanded] = useState(false);
   const maxAttempts = d.maxRetries + 1;
   const typeColor = typeDotColor[d.type] || "#8a8a80";
-  const payloadPreview = truncatePayload(d.payload);
+
+  const payloadStr = formatJson(d.payload);
+  const outputStr = extractResult(d.responseBody ?? null);
+  const hasDetails = !!(payloadStr || outputStr || (d.status === "failed" && d.errorMessage));
 
   return (
     <div
-      className="rounded-lg min-w-[220px] max-w-[260px] overflow-hidden"
+      className="rounded-lg overflow-hidden"
       style={{
         backgroundColor: "#1e1e1a",
         border: d.isCurrent
@@ -62,14 +80,16 @@ function WorkflowNodeComponent({ data }: NodeProps) {
         boxShadow: d.isCurrent
           ? "0 0 8px rgba(212, 165, 116, 0.2)"
           : "none",
+        width: 230,
       }}
     >
       <Handle type="target" position={Position.Left} style={{ background: "#3a3a35", border: "none", width: 6, height: 6 }} />
 
-      {/* Header bar with type color accent */}
+      {/* Header */}
       <div
-        className="flex items-center justify-between px-3 py-1.5"
+        className="flex items-center justify-between px-3 py-1.5 cursor-pointer"
         style={{ borderBottom: "1px solid #3a3a35" }}
+        onClick={() => hasDetails && setExpanded(!expanded)}
       >
         <div className="flex items-center gap-1.5">
           <span
@@ -88,29 +108,8 @@ function WorkflowNodeComponent({ data }: NodeProps) {
         </span>
       </div>
 
-      {/* Body */}
+      {/* Summary */}
       <div className="px-3 py-2 space-y-1.5">
-        {/* Schedule (cron only) */}
-        {d.type === "cron" && d.schedule && (
-          <div
-            className="font-mono text-[10px] px-1.5 py-0.5 rounded"
-            style={{ backgroundColor: "#2a2a25", color: "#8a8a80" }}
-          >
-            {d.schedule}
-          </div>
-        )}
-
-        {/* Payload preview (task only) */}
-        {d.type === "task" && payloadPreview && (
-          <div
-            className="text-[10px] font-mono px-1.5 py-0.5 rounded truncate"
-            style={{ backgroundColor: "#2a2a25", color: "#8a8a80" }}
-          >
-            {payloadPreview}
-          </div>
-        )}
-
-        {/* Status + duration */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span
@@ -129,22 +128,10 @@ function WorkflowNodeComponent({ data }: NodeProps) {
           </span>
         </div>
 
-        {/* Error message (failed only) */}
-        {d.status === "failed" && d.errorMessage && (
-          <div
-            className="text-[10px] px-1.5 py-0.5 rounded truncate"
-            style={{ backgroundColor: "rgba(212,115,74,0.1)", color: "#d4734a" }}
-          >
-            {d.errorMessage}
-          </div>
-        )}
-
-        {/* Attempt + retry */}
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-muted-foreground">
             Attempt {d.attempt}/{maxAttempts}
           </span>
-
           {d.status === "failed" && d.onRetry && (
             <Button
               variant="outline"
@@ -160,6 +147,48 @@ function WorkflowNodeComponent({ data }: NodeProps) {
           )}
         </div>
       </div>
+
+      {/* Expanded details */}
+      {expanded && hasDetails && (
+        <div
+          className="px-3 py-2 space-y-2"
+          style={{ borderTop: "1px solid #3a3a35" }}
+        >
+          {payloadStr && (
+            <div>
+              <p className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Payload</p>
+              <pre
+                className="text-[10px] font-mono p-1.5 rounded overflow-auto max-h-[80px]"
+                style={{ backgroundColor: "#2a2a25", color: "#c5c5b8" }}
+              >
+                {payloadStr}
+              </pre>
+            </div>
+          )}
+          {outputStr && (
+            <div>
+              <p className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Output</p>
+              <pre
+                className="text-[10px] font-mono p-1.5 rounded overflow-auto max-h-[80px]"
+                style={{ backgroundColor: "#2a2a25", color: "#c5c5b8" }}
+              >
+                {outputStr}
+              </pre>
+            </div>
+          )}
+          {d.status === "failed" && d.errorMessage && (
+            <div>
+              <p className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Error</p>
+              <p
+                className="text-[10px] p-1.5 rounded"
+                style={{ backgroundColor: "rgba(212,115,74,0.1)", color: "#d4734a" }}
+              >
+                {d.errorMessage}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       <Handle type="source" position={Position.Right} style={{ background: "#3a3a35", border: "none", width: 6, height: 6 }} />
     </div>

@@ -307,6 +307,7 @@ export class ExecutionsService {
         completedAt: exec.completedAt,
         errorMessage: exec.errorMessage ?? null,
         payload: exec.payload ?? null,
+        responseBody: exec.responseBody ?? null,
       })),
     };
   }

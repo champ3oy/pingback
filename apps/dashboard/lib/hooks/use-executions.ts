@@ -120,6 +120,7 @@ export interface WorkflowNode {
   completedAt: string | null;
   errorMessage: string | null;
   payload: any;
+  responseBody: string | null;
 }
 
 export interface WorkflowTree {
