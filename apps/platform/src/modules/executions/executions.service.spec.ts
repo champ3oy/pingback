@@ -97,6 +97,64 @@ describe('ExecutionsService', () => {
     });
   });
 
+  describe('getWorkflowTree', () => {
+    it('should return full tree when given a leaf node', async () => {
+      const root = { id: 'root', parentId: null, jobId: 'j1', status: 'success', durationMs: 100, attempt: 1, scheduledAt: new Date(), completedAt: new Date(), job: { name: 'step0', type: 'cron', retries: 0 } };
+      const child = { id: 'child', parentId: 'root', jobId: 'j2', status: 'success', durationMs: 50, attempt: 1, scheduledAt: new Date(), completedAt: new Date(), job: { name: 'step1', type: 'task', retries: 2 } };
+      const grandchild = { id: 'grandchild', parentId: 'child', jobId: 'j3', status: 'failed', durationMs: 30, attempt: 2, scheduledAt: new Date(), completedAt: new Date(), job: { name: 'step2', type: 'task', retries: 2 } };
+
+      // findOne for the starting node (grandchild)
+      execRepo.findOne.mockResolvedValueOnce(grandchild);
+      // findOne walking up: child
+      execRepo.findOne.mockResolvedValueOnce(child);
+      // findOne walking up: root (parentId is null, stop)
+      execRepo.findOne.mockResolvedValueOnce(root);
+
+      // find descendants from root
+      const qb = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([root, child, grandchild]),
+      };
+      execRepo.createQueryBuilder.mockReturnValue(qb);
+
+      const result = await service.getWorkflowTree('grandchild');
+
+      expect(result.rootId).toBe('root');
+      expect(result.nodes).toHaveLength(3);
+      expect(result.nodes[0].id).toBe('root');
+      expect(result.nodes[0].functionName).toBe('step0');
+      expect(result.nodes[2].id).toBe('grandchild');
+      expect(result.nodes[2].parentId).toBe('child');
+    });
+
+    it('should return tree when given the root node', async () => {
+      const root = { id: 'root', parentId: null, jobId: 'j1', status: 'success', durationMs: 100, attempt: 1, scheduledAt: new Date(), completedAt: new Date(), job: { name: 'step0', type: 'cron', retries: 0 } };
+      const child = { id: 'child', parentId: 'root', jobId: 'j2', status: 'success', durationMs: 50, attempt: 1, scheduledAt: new Date(), completedAt: new Date(), job: { name: 'step1', type: 'task', retries: 2 } };
+
+      // findOne for starting node (root) — parentId is null, no walk-up needed
+      execRepo.findOne.mockResolvedValueOnce(root);
+
+      const qb = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([root, child]),
+      };
+      execRepo.createQueryBuilder.mockReturnValue(qb);
+
+      const result = await service.getWorkflowTree('root');
+
+      expect(result.rootId).toBe('root');
+      expect(result.nodes).toHaveLength(2);
+    });
+
+    it('should throw NotFoundException for non-existent execution', async () => {
+      execRepo.findOne.mockResolvedValue(null);
+
+      await expect(service.getWorkflowTree('nope')).rejects.toThrow(NotFoundException);
+    });
+  });
+
   describe('hasPendingOrRunning', () => {
     it('should return true when pending/running execution exists', async () => {
       execRepo.count.mockResolvedValue(1);

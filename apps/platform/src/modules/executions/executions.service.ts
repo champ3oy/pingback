@@ -228,6 +228,83 @@ export class ExecutionsService {
     return result;
   }
 
+  async getWorkflowTree(executionId: string): Promise<{
+    rootId: string;
+    nodes: Array<{
+      id: string;
+      functionName: string;
+      type: string;
+      status: string;
+      durationMs: number | null;
+      attempt: number;
+      maxRetries: number;
+      parentId: string | null;
+      jobId: string;
+      scheduledAt: Date;
+      completedAt: Date | null;
+    }>;
+  }> {
+    // Find starting execution
+    const start = await this.execRepo.findOne({
+      where: { id: executionId },
+      relations: ['job'],
+    });
+    if (!start) throw new NotFoundException('Execution not found');
+
+    // Walk up to find root
+    let root = start;
+    while (root.parentId) {
+      const parent = await this.execRepo.findOne({
+        where: { id: root.parentId },
+        relations: ['job'],
+      });
+      if (!parent) break;
+      root = parent;
+    }
+
+    // Fetch all descendants using breadth-first approach
+    const allNodes: typeof root[] = [];
+    const queue = [root.id];
+    const visited = new Set<string>();
+
+    allNodes.push(root);
+    visited.add(root.id);
+
+    while (queue.length > 0) {
+      const parentId = queue.shift()!;
+      const children = await this.execRepo
+        .createQueryBuilder('exec')
+        .leftJoinAndSelect('exec.job', 'job')
+        .where('exec.parent_id = :parentId', { parentId })
+        .getMany();
+
+      for (const child of children) {
+        if (!visited.has(child.id)) {
+          visited.add(child.id);
+          allNodes.push(child);
+          queue.push(child.id);
+        }
+      }
+    }
+
+    return {
+      rootId: root.id,
+      nodes: allNodes.map((exec) => ({
+        id: exec.id,
+        functionName: exec.job?.name || 'unknown',
+        type: exec.job?.type || 'task',
+        status: exec.status,
+        durationMs: exec.durationMs,
+        attempt: exec.attempt,
+        maxRetries: exec.job?.retries || 0,
+        parentId: exec.parentId,
+        jobId: exec.jobId,
+        scheduledAt: exec.scheduledAt,
+        completedAt: exec.completedAt,
+      })),
+    };
+  }
+
   async hasPendingOrRunning(jobId: string, scheduledAt: Date): Promise<boolean> {
     const count = await this.execRepo.count({
       where: [
