@@ -32,7 +32,7 @@ function getLayoutedElements(
 ) {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", nodesep: 40, ranksep: 60 });
+  g.setGraph({ rankdir: "LR", nodesep: 40, ranksep: 60 });
 
   nodes.forEach((node) => {
     g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
@@ -113,7 +113,7 @@ export function WorkflowGraph({
 
   return (
     <div
-      style={{ height: 300 }}
+      style={{ height: 450 }}
       className="w-full [&_.react-flow__background]:!bg-transparent [&_.react-flow__pane]:!bg-transparent [&_.react-flow__controls_button]:!bg-[#1e1e1a] [&_.react-flow__controls_button]:!border-[#3a3a35] [&_.react-flow__controls_button]:!fill-[#8a8a80] [&_.react-flow__controls_button:hover]:!fill-[#f5f5f0]"
     >
       <ReactFlow

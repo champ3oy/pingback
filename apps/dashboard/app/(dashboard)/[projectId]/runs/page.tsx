@@ -301,7 +301,7 @@ function RunDetail({ exec, projectId }: { exec: Execution; projectId: string }) 
         </div>
       )}
       {showWorkflow && workflowTree && (
-        <div className="border-t border-border p-4">
+        <div className="border-t border-b border-border p-4">
           <WorkflowGraph
             workflowNodes={workflowTree.nodes}
             currentExecutionId={exec.id}

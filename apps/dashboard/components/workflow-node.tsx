@@ -46,7 +46,7 @@ function WorkflowNodeComponent({ data }: NodeProps) {
           : "none",
       }}
     >
-      <Handle type="target" position={Position.Top} style={{ background: "#3a3a35", border: "none", width: 6, height: 6 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3a3a35", border: "none", width: 6, height: 6 }} />
 
       {/* Header: status dot + function name */}
       <div className="flex items-center gap-1.5 mb-2">
@@ -89,7 +89,7 @@ function WorkflowNodeComponent({ data }: NodeProps) {
         )}
       </div>
 
-      <Handle type="source" position={Position.Bottom} style={{ background: "#3a3a35", border: "none", width: 6, height: 6 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#3a3a35", border: "none", width: 6, height: 6 }} />
     </div>
   );
 }
