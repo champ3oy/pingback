@@ -21,10 +21,10 @@ const features = [
       "Configurable retry policies with exponential backoff. Failed jobs recover without you waking up at 3 AM.",
   },
   {
-    title: "Fan-Out Tasks",
+    title: "Workflows",
     badge: { label: "Execution", bg: "#d4734a", text: "#2a1f0a", icon: "M5 12h14" },
     description:
-      "Spawn independent sub-tasks from any job. Each runs with its own retries, timeout, and tracking.",
+      "Chain tasks into multi-step workflows with branching. Fan out, retry individual steps, and visualize the entire flow.",
   },
 ];
 

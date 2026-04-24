@@ -137,30 +137,38 @@ export const generateThumbnail = task(
     name: "Workflows",
     icon: { path: "M5 3v4M3 5h4M6 17v4M4 19h4M13 3l2 2 4-4M17 14v7M14 17h7", color: "#3b82f6" },
     description:
-      "Chain tasks together to build multi-step workflows. Each step runs as its own task with independent retries and logging.",
-    code: `import { cron } from "@usepingback/next";
+      "Chain tasks into multi-step workflows. Each step calls ctx.task() to trigger the next — with branching, retries, and a visual graph in your dashboard.",
+    code: `import { task } from "@usepingback/next";
 
-export const onboardUser = cron(
-  "onboard-new-users",
-  "*/10 * * * *",
-  async (ctx) => {
-    const users = await db.users.findUnonboarded();
+export const validateOrder = task(
+  "validate-order",
+  async (ctx, payload) => {
+    ctx.log("Validating", { orderId: payload.orderId });
 
-    for (const user of users) {
-      ctx.log(\`Onboarding \${user.email}\`);
-
-      await ctx.task("send-welcome-email", {
-        userId: user.id,
+    if (payload.amount <= 0) {
+      ctx.task("notify-failure", {
+        orderId: payload.orderId,
+        reason: "Invalid amount",
       });
-      await ctx.task("create-default-project", {
-        userId: user.id,
-      });
-      await ctx.task("notify-team-slack", {
-        email: user.email,
-      });
+      return { valid: false };
     }
+
+    ctx.task("charge-payment", payload);
+    return { valid: true };
   },
   { retries: 2 }
+);
+
+export const chargePayment = task(
+  "charge-payment",
+  async (ctx, payload) => {
+    const charge = await stripe.charges.create({
+      amount: payload.amount * 100,
+    });
+    ctx.log("Payment charged", { chargeId: charge.id });
+    ctx.task("send-confirmation", payload);
+  },
+  { retries: 3 }
 );`,
   },
   {

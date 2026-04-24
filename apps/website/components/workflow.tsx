@@ -8,14 +8,26 @@ const frameworks = [
     name: "Next.js",
     lang: "typescript",
     install: "npm install @usepingback/next",
-    code: `import { cron } from "@usepingback/next";
+    code: `import { cron, task } from "@usepingback/next";
 
-export const cleanup = cron(
-  "cleanup",
-  "0 3 * * *",
+export const processOrders = cron(
+  "process-orders", "*/10 * * * *",
   async (ctx) => {
-    const expired = await removeExpiredSessions();
-    ctx.log(\`Removed \${expired} sessions\`);
+    const orders = await db.orders.findPending();
+    for (const order of orders) {
+      ctx.task("validate-order", order);
+    }
+  }
+);
+
+export const validateOrder = task(
+  "validate-order",
+  async (ctx, payload) => {
+    if (payload.amount > 0) {
+      ctx.task("charge-payment", payload);
+    } else {
+      ctx.task("notify-failure", { reason: "Invalid amount" });
+    }
   },
   { retries: 2 }
 );`,
@@ -24,27 +36,47 @@ export const cleanup = cron(
     name: "NestJS",
     lang: "typescript",
     install: "npm install @usepingback/nestjs",
-    code: `import { Cron, PingbackContext } from "@usepingback/nestjs";
+    code: `import { Cron, Task, PingbackContext } from "@usepingback/nestjs";
 
-@Cron("cleanup", "0 3 * * *", { retries: 2 })
-async handleCleanup(ctx: PingbackContext) {
-  const expired = await this.sessionService.removeExpired();
-  ctx.log(\`Removed \${expired} sessions\`);
+@Cron("process-orders", "*/10 * * * *")
+async processOrders(ctx: PingbackContext) {
+  const orders = await this.ordersService.findPending();
+  for (const order of orders) {
+    ctx.task("validate-order", order);
+  }
+}
+
+@Task("validate-order", { retries: 2 })
+async validateOrder(ctx: PingbackContext, payload) {
+  if (payload.amount > 0) {
+    ctx.task("charge-payment", payload);
+  } else {
+    ctx.task("notify-failure", { reason: "Invalid amount" });
+  }
 }`,
   },
   {
     name: "Go",
     lang: "go",
     install: "go get github.com/champ3oy/pingback-go",
-    code: `pb := pingback.New(os.Getenv("PINGBACK_API_KEY"), os.Getenv("PINGBACK_CRON_SECRET"))
+    code: `pb := pingback.New(apiKey, cronSecret)
 
-pb.Cron("cleanup", "0 3 * * *", func(ctx *pingback.Context) (any, error) {
-    expired, err := removeExpiredSessions()
-    ctx.Log("Removed sessions", "count", expired)
-    return map[string]int{"removed": expired}, err
-}, pingback.WithRetries(2))
+pb.Cron("process-orders", "*/10 * * * *", func(ctx *pingback.Context) (any, error) {
+    orders := fetchPendingOrders()
+    for _, order := range orders {
+        ctx.Task("validate-order", order)
+    }
+    return nil, nil
+})
 
-http.Handle("/api/pingback", pb.Handler())`,
+pb.Task("validate-order", func(ctx *pingback.Context) (any, error) {
+    if ctx.Payload["amount"].(float64) > 0 {
+        ctx.Task("charge-payment", ctx.Payload)
+    } else {
+        ctx.Task("notify-failure", map[string]any{"reason": "Invalid amount"})
+    }
+    return nil, nil
+}, pingback.WithRetries(2))`,
   },
   {
     name: "Python",
@@ -52,13 +84,20 @@ http.Handle("/api/pingback", pb.Handler())`,
     install: "pip install pingback-py",
     code: `from pingback import Pingback
 
-pb = Pingback(api_key=os.environ["PINGBACK_API_KEY"], cron_secret=os.environ["PINGBACK_CRON_SECRET"])
+pb = Pingback(api_key=API_KEY, cron_secret=CRON_SECRET)
 
-@pb.cron("cleanup", "0 3 * * *", retries=2)
-def cleanup(ctx):
-    expired = remove_expired_sessions()
-    ctx.log("Removed sessions", count=expired)
-    return {"removed": expired}`,
+@pb.cron("process-orders", "*/10 * * * *")
+def process_orders(ctx):
+    orders = db.orders.find_pending()
+    for order in orders:
+        ctx.task("validate-order", order)
+
+@pb.task("validate-order", retries=2)
+def validate_order(ctx):
+    if ctx.payload["amount"] > 0:
+        ctx.task("charge-payment", ctx.payload)
+    else:
+        ctx.task("notify-failure", {"reason": "Invalid amount"})`,
   },
 ];
 

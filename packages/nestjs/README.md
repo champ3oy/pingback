@@ -54,6 +54,43 @@ PINGBACK_API_KEY=pb_live_...
 PINGBACK_CRON_SECRET=...
 ```
 
+## Workflows (Task Chaining)
+
+Tasks can call `ctx.task()` to chain into multi-step workflows with branching:
+
+```typescript
+@Injectable()
+export class OrderService {
+  @Task('validate-order', { retries: 2 })
+  async validateOrder(ctx: PingbackContext, payload: { orderId: string; amount: number }) {
+    ctx.log('Validating', { orderId: payload.orderId });
+
+    if (payload.amount <= 0) {
+      ctx.task('notify-failure', { orderId: payload.orderId, reason: 'Invalid amount' });
+      return { valid: false };
+    }
+
+    ctx.task('charge-payment', payload);
+    return { valid: true };
+  }
+
+  @Task('charge-payment', { retries: 3 })
+  async chargePayment(ctx: PingbackContext, payload: { orderId: string; amount: number }) {
+    const charge = await this.stripe.charge(payload.amount);
+    ctx.log('Charged', { chargeId: charge.id });
+    ctx.task('send-confirmation', payload);
+  }
+
+  @Task('send-confirmation', { retries: 2 })
+  async sendConfirmation(ctx: PingbackContext, payload: { orderId: string }) {
+    await this.mailer.send(payload.orderId);
+    ctx.log('Confirmation sent');
+  }
+}
+```
+
+Each step runs as its own execution with independent retries and logging. The workflow graph in your dashboard visualizes the full chain.
+
 ## Programmatic Triggering
 
 Use `PingbackClient` to trigger tasks from anywhere in your application — no cron schedule or fan-out needed. It's an injectable service:

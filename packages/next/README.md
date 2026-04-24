@@ -126,7 +126,40 @@ export const sendEmail = task("send-email", async (ctx, { id }) => {
 }, { retries: 2, timeout: "15s" });
 ```
 
-Each task runs independently with its own retries and timeout. Retries happen within the same execution.
+Each task runs independently with its own retries and timeout.
+
+### Workflows (Task Chaining)
+
+Tasks can call `ctx.task()` to chain into multi-step workflows with branching:
+
+```ts
+import { task } from "@usepingback/next";
+
+export const validateOrder = task("validate-order", async (ctx, payload) => {
+  ctx.log("Validating", { orderId: payload.orderId });
+
+  if (payload.amount <= 0) {
+    ctx.task("notify-failure", { orderId: payload.orderId, reason: "Invalid amount" });
+    return { valid: false };
+  }
+
+  ctx.task("charge-payment", payload);
+  return { valid: true };
+}, { retries: 2 });
+
+export const chargePayment = task("charge-payment", async (ctx, payload) => {
+  const charge = await stripe.charges.create({ amount: payload.amount * 100 });
+  ctx.log("Charged", { chargeId: charge.id });
+  ctx.task("send-confirmation", payload);
+}, { retries: 3 });
+
+export const sendConfirmation = task("send-confirmation", async (ctx, payload) => {
+  await mailer.send(payload.email, "Order confirmed");
+  ctx.log("Confirmation sent");
+}, { retries: 2 });
+```
+
+Each step runs as its own execution with independent retries and logging. The workflow graph in your dashboard visualizes the full chain.
 
 ## Programmatic Triggering
 
