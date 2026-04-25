@@ -31,20 +31,26 @@ pb = Pingback(
         Use <InlineCode>@pb.cron()</InlineCode> and <InlineCode>@pb.task()</InlineCode> decorators
         to register functions. The return value becomes the execution result:
       </p>
-      <DocsCode code={`@pb.cron("send-emails", "*/15 * * * *", retries=3, timeout="60s")
+      <DocsCode code={`from dataclasses import dataclass
+
+@dataclass
+class Email:
+    id: str
+    recipient: str
+
+@pb.cron("send-emails", "*/15 * * * *", retries=3, timeout="60s")
 def send_emails(ctx):
     pending = get_pending_emails()
     for email in pending:
-        ctx.task("send-email", {"id": email.id})
+        ctx.task("send-email", {"id": email.id, "recipient": email.recipient})
     ctx.log("Dispatched emails", count=len(pending))
     return {"dispatched": len(pending)}
 
 @pb.task("send-email", retries=2, timeout="15s")
-def send_email(ctx):
-    email_id = ctx.payload["id"]
-    deliver_email(email_id)
-    ctx.log("Sent email", id=email_id)
-    return {"sent": email_id}`} lang="python" />
+def send_email(ctx, email: Email):
+    deliver_email(email.id, email.recipient)
+    ctx.log("Sent email", id=email.id)
+    return {"sent": email.id}`} lang="python" />
 
       <h2 className="text-xl font-semibold mt-10 mb-3">Typed Payloads</h2>
       <p className="text-sm text-muted-foreground mb-2">

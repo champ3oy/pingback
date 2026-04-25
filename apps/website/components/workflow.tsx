@@ -59,7 +59,10 @@ async validateOrder(ctx: PingbackContext, payload) {
     name: "Go",
     lang: "go",
     install: "go get github.com/runpingback/pingback-go",
-    code: `pb := pingback.New(apiKey, cronSecret)
+    code: `type Order struct {
+    OrderID string  \`json:"orderId"\`
+    Amount  float64 \`json:"amount"\`
+}
 
 pb.Cron("process-orders", "*/10 * * * *", func(ctx *pingback.Context) (any, error) {
     orders := fetchPendingOrders()
@@ -69,9 +72,9 @@ pb.Cron("process-orders", "*/10 * * * *", func(ctx *pingback.Context) (any, erro
     return nil, nil
 })
 
-pb.Task("validate-order", func(ctx *pingback.Context) (any, error) {
-    if ctx.Payload["amount"].(float64) > 0 {
-        ctx.Task("charge-payment", ctx.Payload)
+pingback.TaskWith(pb, "validate-order", func(ctx *pingback.Context, order Order) (any, error) {
+    if order.Amount > 0 {
+        ctx.Task("charge-payment", order)
     } else {
         ctx.Task("notify-failure", map[string]any{"reason": "Invalid amount"})
     }
@@ -82,9 +85,15 @@ pb.Task("validate-order", func(ctx *pingback.Context) (any, error) {
     name: "Python",
     lang: "python",
     install: "pip install pingback-py",
-    code: `from pingback import Pingback
+    code: `from dataclasses import dataclass
+from pingback import Pingback
 
 pb = Pingback(api_key=API_KEY, cron_secret=CRON_SECRET)
+
+@dataclass
+class Order:
+    order_id: str
+    amount: float
 
 @pb.cron("process-orders", "*/10 * * * *")
 def process_orders(ctx):
@@ -93,9 +102,9 @@ def process_orders(ctx):
         ctx.task("validate-order", order)
 
 @pb.task("validate-order", retries=2)
-def validate_order(ctx):
-    if ctx.payload["amount"] > 0:
-        ctx.task("charge-payment", ctx.payload)
+def validate_order(ctx, order: Order):
+    if order.amount > 0:
+        ctx.task("charge-payment", {"order_id": order.order_id, "amount": order.amount})
     else:
         ctx.task("notify-failure", {"reason": "Invalid amount"})`,
   },

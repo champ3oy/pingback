@@ -61,6 +61,27 @@ pb.Task("send-email", func(ctx *pingback.Context) (any, error) {
     return nil, err
 }, pingback.WithRetries(2), pingback.WithTimeout("15s"))`} lang="go" />
 
+      <h2 className="text-xl font-semibold mt-10 mb-3">Typed Payloads</h2>
+      <p className="text-sm text-muted-foreground mb-2">
+        Use <InlineCode>pingback.TaskWith</InlineCode> to define handlers with a typed payload parameter.
+        The SDK automatically unmarshals the JSON payload into your struct:
+      </p>
+      <DocsCode code={`type EmailPayload struct {
+    To      string \`json:"to"\`
+    Subject string \`json:"subject"\`
+}
+
+pingback.TaskWith(pb, "send-email", func(ctx *pingback.Context, payload EmailPayload) (any, error) {
+    // payload.To, payload.Subject — already unmarshalled
+    ctx.Log("Sending email", "to", payload.To)
+    sendMail(payload.To, payload.Subject)
+    return map[string]bool{"sent": true}, nil
+}, pingback.WithRetries(3))`} lang="go" />
+      <p className="text-sm text-muted-foreground mt-3">
+        Both <InlineCode>pb.Task()</InlineCode> (untyped, manual unmarshal) and <InlineCode>pingback.TaskWith[T]()</InlineCode> (typed, automatic unmarshal) are supported.
+        <InlineCode>pingback.CronWith[T]()</InlineCode> is also available for crons with payloads.
+      </p>
+
       <h2 className="text-xl font-semibold mt-10 mb-3">Structured Logging</h2>
       <p className="text-sm text-muted-foreground mb-2">
         The context provides structured logging with key-value metadata:
