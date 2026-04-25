@@ -13,6 +13,7 @@ import { QueueService } from './queue.service';
         const boss = new PgBoss(config.get<string>('database.url') as string);
         await boss.start();
         await boss.createQueue('pingback-execution');
+        await boss.createQueue('pingback-alert-evaluation');
         return boss;
       },
     },

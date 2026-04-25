@@ -39,12 +39,12 @@ export class WorkerService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.queueService.work('pingback-execution', (jobs: any) => {
-      // pgboss v10 passes an array of jobs to the handler
-      const jobList = Array.isArray(jobs) ? jobs : [jobs];
-      return Promise.all(jobList.map((j: any) => this.processJob(j)));
-    });
-    this.logger.log('Worker subscribed to pingback-execution queue');
+    // Disabled: Go worker now handles execution processing
+    // this.queueService.work('pingback-execution', (jobs: any) => {
+    //   const jobList = Array.isArray(jobs) ? jobs : [jobs];
+    //   return Promise.all(jobList.map((j: any) => this.processJob(j)));
+    // });
+    this.logger.log('Worker subscription disabled - Go worker handles execution');
   }
 
   async processJob(job: any) {
