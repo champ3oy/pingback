@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ForbiddenException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
 import { Alert } from './alert.entity';
@@ -10,9 +10,10 @@ import { UpdateAlertDto } from './dto/update-alert.dto';
 import { PlanLimitsService } from '../subscription/plan-limits.service';
 import { User } from '../../entities/user.entity';
 import { Project } from '../projects/project.entity';
+import { QueueService } from '../queue/queue.service';
 
 @Injectable()
-export class AlertsService {
+export class AlertsService implements OnModuleInit {
   private readonly logger = new Logger(AlertsService.name);
 
   constructor(
@@ -23,7 +24,24 @@ export class AlertsService {
     @InjectRepository(User) private userRepo: Repository<User>,
     private emailNotifier: EmailNotifier,
     private planLimitsService: PlanLimitsService,
+    private queueService: QueueService,
   ) {}
+
+  onModuleInit() {
+    this.queueService.work('pingback-alert-evaluation', (jobs: any) => {
+      const jobList = Array.isArray(jobs) ? jobs : [jobs];
+      return Promise.all(
+        jobList.map(async (job: any) => {
+          const { jobId, executionId } = job.data;
+          this.logger.log(
+            `Processing alert evaluation for job=${jobId} execution=${executionId}`,
+          );
+          await this.evaluate(jobId, executionId);
+        }),
+      );
+    });
+    this.logger.log('Subscribed to pingback-alert-evaluation queue');
+  }
 
   async evaluate(jobId: string, executionId: string) {
     const job = await this.jobRepo.findOne({
