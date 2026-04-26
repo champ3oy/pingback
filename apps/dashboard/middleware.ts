@@ -20,7 +20,12 @@ export function middleware(request: NextRequest) {
   }
 
   if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const refreshToken = request.cookies.get("pingback_refresh_token")?.value;
+    if (!refreshToken) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    // Access token expired but refresh token exists — let through.
+    // The client-side API will handle 401 → refresh → retry.
   }
 
   return NextResponse.next();
