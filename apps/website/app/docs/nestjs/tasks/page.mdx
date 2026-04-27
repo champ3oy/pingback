@@ -1,0 +1,32 @@
+export const metadata = { title: "NestJS Tasks — Pingback Docs" };
+
+# Tasks
+
+Define background tasks using the `@Task` decorator. Tasks receive a payload and can be triggered via fan-out, programmatically, or from the dashboard.
+
+## Defining a Task
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { Task, PingbackContext } from '@usepingback/nestjs';
+
+@Injectable()
+export class EmailService {
+  @Task('send-email', { retries: 2, timeout: '15s' })
+  async sendEmail(ctx: PingbackContext, payload: { id: string }) {
+    const email = await getEmail(payload.id);
+    await deliver(email);
+    ctx.log('Sent email', { id: payload.id });
+  }
+}
+```
+
+## Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `retries` | 0–10 | 0 | Retry attempts with exponential backoff |
+| `timeout` | string | "30s" | Max execution time (e.g. "30s", "5m") |
+| `concurrency` | 1–10 | 1 | Max concurrent executions |
+
+> **Note:** Tasks can also be triggered manually from the Pingback dashboard. Navigate to your task and click "Run" to dispatch it with a custom payload.

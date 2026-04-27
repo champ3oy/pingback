@@ -1,0 +1,77 @@
+export const metadata = { title: "NestJS Getting Started — Pingback Docs" };
+
+# NestJS
+
+Set up Pingback in your NestJS app with the `@usepingback/nestjs` adapter.
+
+## Installation
+
+```bash
+npm install @usepingback/nestjs
+```
+
+## Module Setup
+
+Import `PingbackModule` and call `register()` in your root module. The module auto-registers a POST endpoint and scans your providers for decorated handlers on startup:
+
+```typescript
+import { PingbackModule } from '@usepingback/nestjs';
+
+@Module({
+  imports: [
+    PingbackModule.register({
+      apiKey: process.env.PINGBACK_API_KEY,
+      cronSecret: process.env.PINGBACK_CRON_SECRET,
+      baseUrl: process.env.APP_URL,
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+## Configuration
+
+The full set of options accepted by `PingbackModule.register()`:
+
+```typescript
+PingbackModule.register({
+  apiKey: string;          // Required — your project API key
+  cronSecret: string;      // Required — request signing secret
+  baseUrl?: string;        // Your app's public URL
+  routePath?: string;      // default: /api/pingback
+  platformUrl?: string;    // default: https://api.pingback.lol
+})
+```
+
+## Environment Variables
+
+Add these to your `.env` file:
+
+```bash
+PINGBACK_API_KEY=pb_live_your_api_key_here
+PINGBACK_CRON_SECRET=your_cron_secret_here
+```
+
+| Variable | Description |
+|----------|-------------|
+| `PINGBACK_API_KEY` | Your project API key. Found in the dashboard under API Keys. |
+| `PINGBACK_CRON_SECRET` | Request signing secret. Found in the dashboard under project Settings. |
+
+## Local Development
+
+Use `npx pingback-nest dev [port]` to test your cron jobs and tasks locally against the production Pingback platform:
+
+```bash
+# Start your NestJS dev server, then in another terminal:
+npx pingback-nest dev 3000
+```
+
+Executions triggered from the dashboard or by schedule will be routed to your local machine.
+
+## How It Works
+
+1. On startup, the module scans all providers for `@Cron` and `@Task` decorators.
+2. Discovered functions are registered with the Pingback platform via the API.
+3. A POST endpoint is auto-registered at `/api/pingback` (configurable).
+4. The platform sends signed execution requests to your endpoint on schedule.
+5. The controller verifies the HMAC signature, executes the handler, and returns results with logs.

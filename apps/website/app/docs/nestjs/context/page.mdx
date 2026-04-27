@@ -1,0 +1,29 @@
+export const metadata = { title: "NestJS Context & Logging — Pingback Docs" };
+
+# Context & Logging
+
+The `ctx` (`PingbackContext`) object is passed to every `@Cron` and `@Task` handler.
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `ctx.executionId` | `string` | Unique ID for this execution |
+| `ctx.attempt` | `number` | Current retry attempt (1-indexed) |
+| `ctx.scheduledAt` | `Date` | When this run was scheduled |
+| `ctx.log(message, meta?)` | `Function` | Add a structured log entry |
+| `ctx.task(name, payload)` | `Function` | Dispatch a child task |
+
+## Structured Logging
+
+`ctx.log()` logs at the `info` level. Use `.warn()`, `.error()`, and `.debug()` for other levels:
+
+```typescript
+ctx.log('message');                          // info
+ctx.log('message', { key: 'value' });        // info with metadata
+ctx.log.warn('slow query', { ms: 2500 });    // warning
+ctx.log.error('failed', { code: 'E001' });   // error
+ctx.log.debug('cache stats', { hits: 847 }); // debug
+```
+
+All log entries are visible in the Pingback dashboard under the execution detail view.

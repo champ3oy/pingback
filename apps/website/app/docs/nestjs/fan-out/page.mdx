@@ -1,0 +1,67 @@
+export const metadata = { title: "NestJS Fan-Out — Pingback Docs" };
+
+# Fan-Out
+
+Dispatch background tasks from within a handler using `ctx.task()`. Each task runs independently with its own retries and timeout.
+
+## Basic Fan-Out
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { Cron, Task, PingbackContext } from '@usepingback/nestjs';
+
+@Injectable()
+export class EmailService {
+  @Cron('send-emails', '*/15 * * * *', { retries: 3, timeout: '60s' })
+  async sendEmails(ctx: PingbackContext) {
+    const pending = await getPendingEmails();
+    for (const email of pending) {
+      await ctx.task('send-email', { id: email.id });
+    }
+    ctx.log(`Dispatched ${pending.length} emails`);
+  }
+
+  @Task('send-email', { retries: 2, timeout: '15s' })
+  async sendEmail(ctx: PingbackContext, payload: { id: string }) {
+    const email = await getEmail(payload.id);
+    await deliver(email);
+    ctx.log('Sent email', { id: payload.id });
+  }
+}
+```
+
+## How Fan-Out Works
+
+1. The handler calls `ctx.task("task-name", payload)` which collects the task request in memory.
+2. When the handler finishes, the SDK returns the collected tasks in the response.
+3. The platform creates a child execution for each task, linked to the parent.
+4. Each child task is dispatched independently via the queue with its own retry policy.
+5. Child tasks appear nested under the parent execution in the dashboard.
+
+## Workflows (Task Chaining)
+
+Tasks can call `ctx.task()` to chain into multi-step workflows:
+
+```typescript
+@Task('validate-order', { retries: 2 })
+async validateOrder(ctx: PingbackContext, payload: any) {
+  ctx.log('Validating', { orderId: payload.orderId });
+
+  if (payload.amount <= 0) {
+    await ctx.task('notify-failure', { orderId: payload.orderId, reason: 'Invalid amount' });
+    return { valid: false };
+  }
+
+  await ctx.task('charge-payment', payload);
+  return { valid: true };
+}
+
+@Task('charge-payment', { retries: 3 })
+async chargePayment(ctx: PingbackContext, payload: any) {
+  const charge = await stripe.charges.create({ amount: payload.amount * 100 });
+  ctx.log('Charged', { chargeId: charge.id });
+  await ctx.task('send-confirmation', payload);
+}
+```
+
+Each step runs as its own execution with independent retries and logging.

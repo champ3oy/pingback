@@ -1,0 +1,42 @@
+export const metadata = { title: "NestJS Triggering — Pingback Docs" };
+
+# Triggering
+
+In NestJS, `PingbackClient` is an injectable service. Use it to trigger tasks from anywhere in your application.
+
+## Usage
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { PingbackClient } from '@usepingback/nestjs';
+
+@Injectable()
+export class AuthService {
+  constructor(private readonly pingback: PingbackClient) {}
+
+  async register(email: string, password: string) {
+    const user = await this.createUser(email, password);
+
+    const { executionId } = await this.pingback.trigger(
+      "send-onboarding-email",
+      { userId: user.id },
+    );
+
+    return user;
+  }
+}
+```
+
+## API
+
+```typescript
+const { executionId, scheduledAt } = await this.pingback.trigger(taskName, payload?, options?);
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `taskName` | `string` | Name of a registered task in your project. |
+| `payload` | `any?` | Optional JSON payload passed to the task handler. |
+| `options.delay` | `number \| string?` | Optional delay before execution (see [Delayed Triggers](/docs/nestjs/delayed-triggers)). |
+
+Returns `{ executionId: string, scheduledAt: string }`.
