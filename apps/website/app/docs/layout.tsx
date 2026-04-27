@@ -2,6 +2,7 @@ import { Navbar } from "@/components/navbar";
 import { DocsSidebar } from "@/components/docs-sidebar";
 import { GridDot } from "@/components/grid-section";
 import { Footer } from "@/components/footer";
+import { DocsCopyButton } from "@/components/docs-copy-button";
 
 export default function DocsLayout({
   children,
@@ -23,7 +24,10 @@ export default function DocsLayout({
                 <DocsSidebar />
               </div>
             </div>
-            <article className="flex-1 min-w-0 px-8 py-10">
+            <article className="flex-1 min-w-0 px-8 py-10 relative">
+              <div className="absolute top-4 right-4">
+                <DocsCopyButton />
+              </div>
               {children}
             </article>
           </div>
