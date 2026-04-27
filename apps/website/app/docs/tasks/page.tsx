@@ -114,7 +114,11 @@ const { executionId } = await pingback.trigger("send-email", {
   subject: "Welcome!",
 });
 
-console.log("Triggered execution:", executionId);`} />
+// With a delay — run 15 minutes from now
+await pingback.trigger("send-email", { to: "user@example.com" }, { delay: "15m" });
+
+// Delay as seconds
+await pingback.trigger("send-email", { to: "user@example.com" }, { delay: 900 });`} />
           ),
         }}
       </FrameworkSwitcher>
@@ -146,7 +150,7 @@ export class AuthService {
 
       <h3 className="text-lg font-semibold mt-8 mb-3">API Reference</h3>
       <DocsCode code={`const client = new PingbackClient(options);
-const { executionId } = await client.trigger(taskName, payload?);`} />
+const { executionId, scheduledAt } = await client.trigger(taskName, payload?, options?);`} />
       <div className="mt-4 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -177,11 +181,16 @@ const { executionId } = await client.trigger(taskName, payload?);`} />
               <td className="py-2 pr-4"><InlineCode>any?</InlineCode></td>
               <td className="py-2">Optional JSON payload passed to the task handler.</td>
             </tr>
+            <tr className="border-b">
+              <td className="py-2 pr-4"><InlineCode>options.delay</InlineCode></td>
+              <td className="py-2 pr-4"><InlineCode>number | string?</InlineCode></td>
+              <td className="py-2">Optional delay before execution. Integer (seconds) or string like <InlineCode>&quot;15m&quot;</InlineCode>, <InlineCode>&quot;2h30m&quot;</InlineCode>, <InlineCode>&quot;1d&quot;</InlineCode>. Max: 30 days.</td>
+            </tr>
           </tbody>
         </table>
       </div>
       <p className="text-sm text-muted-foreground mt-3">
-        Returns <InlineCode>{`{ executionId: string }`}</InlineCode>. Throws if the
+        Returns <InlineCode>{`{ executionId: string, scheduledAt: string }`}</InlineCode>. Throws if the
         task name doesn{"'"}t exist in your project or the API key is invalid.
       </p>
 
