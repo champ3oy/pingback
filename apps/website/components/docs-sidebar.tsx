@@ -87,19 +87,13 @@ const navigation: NavGroup[] = [
   },
   {
     label: "API Reference",
-    sections: [
-      {
-        title: "API Reference",
-        basePath: "/docs/api-reference",
-        items: [
-          { href: "/docs/api-reference/cron-jobs", label: "Cron Jobs" },
-          { href: "/docs/api-reference/tasks", label: "Tasks" },
-          { href: "/docs/api-reference/triggering", label: "Triggering" },
-          { href: "/docs/api-reference/delayed-triggers", label: "Delayed Triggers" },
-          { href: "/docs/api-reference/fan-out", label: "Fan-Out" },
-          { href: "/docs/api-reference/context", label: "Context" },
-        ],
-      },
+    items: [
+      { href: "/docs/api-reference/cron-jobs", label: "Cron Jobs" },
+      { href: "/docs/api-reference/tasks", label: "Tasks" },
+      { href: "/docs/api-reference/triggering", label: "Triggering" },
+      { href: "/docs/api-reference/delayed-triggers", label: "Delayed Triggers" },
+      { href: "/docs/api-reference/fan-out", label: "Fan-Out" },
+      { href: "/docs/api-reference/context", label: "Context" },
     ],
   },
 ];
