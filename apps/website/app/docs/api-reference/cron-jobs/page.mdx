@@ -4,6 +4,18 @@ export const metadata = { title: "Cron Jobs API — Pingback Docs" };
 
 Scheduled functions that run on a cron expression. The platform evaluates schedules every 10 seconds and dispatches executions via the job queue.
 
+## Quick Example
+
+```typescript
+import { cron } from "@usepingback/next";
+
+export const dailyReport = cron("daily-report", "0 9 * * *", async (ctx) => {
+  ctx.log("Generating daily report");
+  const report = await generateReport();
+  await emailClient.send({ to: "team@example.com", report });
+}, { timeout: "5m" });
+```
+
 ## Registration
 
 Each SDK provides a way to register cron jobs — see the SDK-specific docs for syntax. All SDKs accept the same parameters:

@@ -4,6 +4,20 @@ export const metadata = { title: "Delayed Triggers API — Pingback Docs" };
 
 Schedule a task to run after a specified delay instead of immediately.
 
+## Quick Example
+
+```typescript
+import { PingbackClient } from "@usepingback/next";
+
+const pingback = new PingbackClient({ apiKey: process.env.PINGBACK_API_KEY });
+
+// Send a follow-up email 2 hours after sign-up
+await pingback.trigger("send-followup", { userId: "usr_123" }, { delay: "2h" });
+
+// Schedule a reminder 1 day and 30 minutes from now
+await pingback.trigger("send-reminder", { userId: "usr_123" }, { delay: "1d30m" });
+```
+
 ## How It Works
 
 When a `delay` is provided in a trigger request:

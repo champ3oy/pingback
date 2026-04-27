@@ -4,6 +4,25 @@ export const metadata = { title: "Context API — Pingback Docs" };
 
 Every handler receives a context object with execution metadata, logging, and task dispatch.
 
+## Quick Example
+
+```typescript
+import { task } from "@usepingback/next";
+
+export const syncData = task("sync-data", async (ctx) => {
+  ctx.log("Starting sync", { attempt: ctx.attempt, scheduledAt: ctx.scheduledAt });
+
+  try {
+    const result = await fetchExternalData(ctx.payload.source);
+    ctx.log(`Fetched ${result.count} records`);
+    await saveToDatabase(result.data);
+  } catch (err) {
+    ctx.log.error("Sync failed", { error: String(err) });
+    throw err; // rethrow to trigger retry
+  }
+});
+```
+
 ## Properties
 
 | Property | Type | Description |

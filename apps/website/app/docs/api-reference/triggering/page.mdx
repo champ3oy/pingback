@@ -4,6 +4,20 @@ export const metadata = { title: "Triggering API — Pingback Docs" };
 
 Programmatically dispatch a task execution from your application code.
 
+## Quick Example
+
+```typescript
+import { PingbackClient } from "@usepingback/next";
+
+const pingback = new PingbackClient({ apiKey: process.env.PINGBACK_API_KEY });
+
+// Trigger a task with a payload
+await pingback.trigger("send-email", {
+  to: "user@example.com",
+  subject: "Welcome!",
+});
+```
+
 ## HTTP API
 
 ```

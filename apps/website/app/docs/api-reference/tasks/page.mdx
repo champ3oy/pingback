@@ -4,6 +4,23 @@ export const metadata = { title: "Tasks API — Pingback Docs" };
 
 Background functions triggered via fan-out, programmatic triggers, or the dashboard. Unlike crons, tasks have no schedule — they run on demand.
 
+## Quick Example
+
+```typescript
+import { task } from "@usepingback/next";
+
+export const sendEmail = task("send-email", async (ctx) => {
+  const { to, subject, body } = ctx.payload as {
+    to: string;
+    subject: string;
+    body: string;
+  };
+
+  ctx.log(`Sending email to ${to}`);
+  await emailClient.send({ to, subject, body });
+}, { retries: 3, timeout: "30s" });
+```
+
 ## Registration
 
 | Parameter | Type | Required | Description |

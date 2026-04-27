@@ -4,6 +4,25 @@ export const metadata = { title: "Fan-Out API — Pingback Docs" };
 
 Dispatch child tasks from within a handler using `ctx.task()`. Each child runs as an independent execution with its own retry policy, timeout, and logging.
 
+## Quick Example
+
+```typescript
+import { task } from "@usepingback/next";
+
+export const processOrder = task("process-order", async (ctx) => {
+  const { orderId, items, userId } = ctx.payload as {
+    orderId: string;
+    items: string[];
+    userId: string;
+  };
+
+  // Fan out to independent child tasks
+  ctx.task("send-confirmation", { orderId, userId });
+  ctx.task("update-inventory", { items });
+  ctx.task("notify-warehouse", { orderId, items });
+});
+```
+
 ## How It Works
 
 1. Inside a handler, call `ctx.task(name, payload)` one or more times.
