@@ -176,9 +176,15 @@ const pingback = new PingbackClient({
 const { executionId } = await pingback.trigger("send-onboarding-email", {
   userId: user.id,
 });
+
+// With a delay — run 15 minutes from now
+await pingback.trigger("send-onboarding-email", { userId: user.id }, { delay: "15m" });
+
+// Delay as seconds
+await pingback.trigger("send-onboarding-email", { userId: user.id }, { delay: 900 });
 ```
 
-`trigger()` returns an `{ executionId }` you can use for tracking. The task must already be registered in your project (defined with `task()` and deployed).
+`trigger()` returns `{ executionId, scheduledAt }` for tracking. Supported delay formats: integer (seconds), or a string like `"30s"`, `"15m"`, `"2h"`, `"1d"`, `"1d2h30m"`. Maximum delay: 30 days. The task must already be registered in your project (defined with `task()` and deployed).
 
 ## Route Handler
 
