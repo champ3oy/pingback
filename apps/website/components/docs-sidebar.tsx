@@ -88,8 +88,8 @@ const navigation: NavGroup[] = [
   {
     label: "API Reference",
     items: [
-      { href: "/docs/api-reference/cron-jobs", label: "Cron Jobs" },
       { href: "/docs/api-reference/tasks", label: "Tasks" },
+      { href: "/docs/api-reference/cron-jobs", label: "Cron Jobs" },
       { href: "/docs/api-reference/triggering", label: "Triggering" },
       { href: "/docs/api-reference/delayed-triggers", label: "Delayed Triggers" },
       { href: "/docs/api-reference/fan-out", label: "Fan-Out" },

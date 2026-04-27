@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function ApiReferencePage() {
-  redirect("/docs/api-reference/cron-jobs");
+  redirect("/docs/api-reference/tasks");
 }
