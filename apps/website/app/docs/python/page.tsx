@@ -183,7 +183,13 @@ ctx.debug("cache stats", hits=847)         # debug`} lang="python" />
       <p className="text-sm text-muted-foreground mb-2">
         Trigger tasks from anywhere in your code:
       </p>
-      <DocsCode code={`exec_id = pb.trigger("send-email", {"to": "user@example.com"})`} lang="python" />
+      <DocsCode code={`exec_id = pb.trigger("send-email", {"to": "user@example.com"})
+
+# With a delay — run 15 minutes from now
+exec_id = pb.trigger("send-email", {"to": "user@example.com"}, delay="15m")
+
+# Delay as seconds
+exec_id = pb.trigger("send-email", {"to": "user@example.com"}, delay=900)`} lang="python" />
 
       <h2 className="text-xl font-semibold mt-10 mb-3">Fan-Out</h2>
       <p className="text-sm text-muted-foreground mb-2">

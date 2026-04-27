@@ -98,7 +98,13 @@ ctx.Debug("cache stats", "hits", 847)      // debug`} lang="go" />
       </p>
       <DocsCode code={`execID, err := pb.Trigger(context.Background(), "send-email", map[string]string{
     "to": "user@example.com",
-})`} lang="go" />
+})
+
+// With a delay — run 15 minutes from now
+execID, err := pb.Trigger(ctx, "send-email", payload, pingback.WithDelay("15m"))
+
+// Delay as seconds
+execID, err := pb.Trigger(ctx, "send-email", payload, pingback.WithDelay(900))`} lang="go" />
 
       <h2 className="text-xl font-semibold mt-10 mb-3">Fan-Out</h2>
       <p className="text-sm text-muted-foreground mb-2">
