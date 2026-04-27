@@ -10,7 +10,7 @@ export function CTA() {
         <p className="text-muted-foreground mb-8">No credit card required.</p>
         <Link
           href="https://app.pingback.lol/register"
-          className="bg-accent text-accent-foreground px-8 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity inline-block"
+          className="bg-gradient-to-b from-accent to-accent/80 text-accent-foreground px-8 py-2.5 rounded-full text-sm font-medium shadow-[0_1px_2px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_1px_3px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] hover:brightness-110 active:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] active:brightness-95 transition-all inline-block"
         >
           Get Started
         </Link>

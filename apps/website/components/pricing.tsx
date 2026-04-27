@@ -119,9 +119,9 @@ export function Pricing() {
               </ul>
               <Link
                 href={tier.href}
-                className={`text-sm font-medium text-center py-2.5 rounded-full transition-opacity ${
+                className={`text-sm font-medium text-center py-2.5 rounded-full transition-all ${
                   tier.highlight
-                    ? "bg-accent text-accent-foreground hover:opacity-90"
+                    ? "bg-gradient-to-b from-accent to-accent/80 text-accent-foreground shadow-[0_1px_2px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:brightness-110 active:brightness-95"
                     : "border hover:bg-muted"
                 }`}
               >
