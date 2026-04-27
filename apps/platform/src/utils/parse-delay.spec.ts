@@ -64,4 +64,9 @@ describe('parseDelay', () => {
   it('should allow exactly 30 days', () => {
     expect(parseDelay(2592000)).toBe(2592000);
   });
+
+  it('should floor fractional seconds', () => {
+    expect(parseDelay(1.7)).toBe(1);
+    expect(parseDelay(90.9)).toBe(90);
+  });
 });

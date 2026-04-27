@@ -18,7 +18,7 @@ export function parseDelay(value: number | string | undefined | null): number {
     if (value <= 0) {
       throw new Error('Delay must be a positive number of seconds');
     }
-    seconds = value;
+    seconds = Math.floor(value);
   } else {
     // Bare number string
     if (/^\d+$/.test(value)) {

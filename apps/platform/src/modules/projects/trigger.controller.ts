@@ -5,6 +5,7 @@ import {
   UseGuards,
   Req,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -45,7 +46,12 @@ export class TriggerController {
       throw new NotFoundException(`Task "${body.task}" not found in this project`);
     }
 
-    const delaySeconds = parseDelay(body.delay);
+    let delaySeconds: number;
+    try {
+      delaySeconds = parseDelay(body.delay);
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
     const scheduledAt = delaySeconds > 0
       ? new Date(Date.now() + delaySeconds * 1000)
       : new Date();
