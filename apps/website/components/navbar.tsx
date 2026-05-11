@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { PingbackIcon } from "./pingback-icon";
 
 const navLinks = [
   { href: "#pricing", label: "Pricing", external: false },
@@ -18,7 +19,8 @@ export function Navbar() {
         <div className="absolute -bottom-[5px] -left-[5px] w-2.5 h-2.5 rotate-45 border border-border bg-background z-10 hidden md:block" />
         <div className="absolute -bottom-[5px] -right-[5px] w-2.5 h-2.5 rotate-45 border border-border bg-background z-10 hidden md:block" />
         <div className="flex items-center justify-between h-14 px-6">
-          <Link href="/" className="text-xl tracking-tight font-display font-light shrink-0">
+          <Link href="/" className="flex items-center gap-2 text-xl tracking-tight font-display font-light shrink-0">
+            <PingbackIcon className="w-5 h-5" />
             pingback
           </Link>
 

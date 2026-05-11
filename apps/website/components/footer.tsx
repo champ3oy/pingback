@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { GridSection, GridDot } from "./grid-section";
+import { PingbackIcon } from "./pingback-icon";
 
 const links = {
   Product: [
@@ -26,7 +27,10 @@ export function Footer() {
           <GridDot className="-top-[5px] left-3/4 -translate-x-1/2" />
           <GridDot className="-top-[5px] -right-[5px]" />
           <div className="p-8 col-span-2 md:col-span-1 md:border-r border-b md:border-b-0">
-            <p className="text-xl mb-2 font-display font-light">pingback</p>
+            <p className="text-xl mb-2 font-display font-light flex items-center gap-2">
+              <PingbackIcon className="w-5 h-5" />
+              pingback
+            </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Background tasks with logs, monitoring, and control.
             </p>

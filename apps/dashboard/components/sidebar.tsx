@@ -16,6 +16,7 @@ import {
 import { ProjectSwitcher } from "./project-switcher";
 import { UserMenu } from "./user-menu";
 import { UpgradeBanner } from "./upgrade-banner";
+import { PingbackIcon } from "./pingback-icon";
 import { cn } from "@/lib/utils";
 
 const ACTIVE_COLOR = "#d4a574";
@@ -137,7 +138,8 @@ export function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-52 border-r flex flex-col bg-background">
-      <div className="h-12 flex items-center px-2 border-b">
+      <div className="h-12 flex items-center px-3 border-b gap-2">
+        <PingbackIcon className="w-5 h-5 shrink-0" />
         <div className="flex-1 min-w-0">
           <ProjectSwitcher />
         </div>
